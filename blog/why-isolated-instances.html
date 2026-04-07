@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Why Mist Dynamics deploys a dedicated instance per customer instead of multi-tenant SaaS, and what shared tenancy quietly costs production AI workloads.">
+  <title>Why We Use Isolated Instances Instead of Shared Infrastructure — Mist Dynamics</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .post {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 64px 24px 96px;
+    }
+    .post .post-meta {
+      font-size: 14px;
+      color: #737373;
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+    .post .post-meta span + span::before {
+      content: " · ";
+      color: #d4d4d4;
+    }
+    .post h1 {
+      font-size: clamp(32px, 5vw, 48px);
+      letter-spacing: -0.025em;
+      margin-bottom: 32px;
+    }
+    .post h2 {
+      font-size: 24px;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      letter-spacing: -0.015em;
+    }
+    .post p {
+      font-size: 18px;
+      line-height: 1.75;
+      color: #262626;
+      margin-bottom: 20px;
+    }
+    .post .post-back {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #525252;
+      margin-bottom: 32px;
+    }
+    .post .post-back:hover {
+      color: #0f172a;
+      text-decoration: none;
+    }
+    .post-cta {
+      margin-top: 64px;
+      padding: 32px;
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .post-cta h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+    .post-cta p {
+      font-size: 16px;
+      color: #525252;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Blog</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <article class="post">
+    <a href="index.html" class="post-back">&larr; All posts</a>
+    <span class="eyebrow">Architecture</span>
+    <h1>Why We Use Isolated Instances Instead of Shared Infrastructure</h1>
+    <div class="post-meta">
+      <span>April 7, 2026</span>
+      <span>5 min read</span>
+      <span>Mist Dynamics</span>
+    </div>
+
+    <div class="post-body">
+      <p>Most AI infrastructure is sold on a shared-tenancy model because it is easy for the vendor to operate and easy to price. That default works well enough for prototypes. It starts to fail quietly when the workload moves into production and becomes subject to latency targets, security review, and audit scrutiny.</p>
+      <h2>The shared-tenancy default</h2>
+      <p>Most LLM gateways are multi-tenant SaaS systems. Prompts and responses from many customers pass through the same application processes, the same worker pools, the same request queues, the same caches, the same rate-limit buckets, and often the same logging and analytics pipelines. The isolation boundary is usually logical. A tenant ID is attached to the request, and the platform relies on code paths, access controls, and query filters to keep data separated.</p>
+      <p>That model is operationally efficient for the vendor, but it creates three common failure modes for enterprise workloads.</p>
+      <p>The first is noisy-neighbor latency. In a shared service, your request path competes with everyone else using the platform at that moment. One tenant ships a batch job, another has a traffic spike, a third starts retrying aggressively after a provider error, and the result is increased queueing and less predictable tail latency for everyone sharing the system. Even if the median response time looks acceptable, the p95 and p99 often tell the real story. For internal demos, that may be tolerable. For customer-facing agents, claims workflows, or regulated review loops, it usually is not.</p>
+      <p>The second is cross-tenant data leakage risk. We are not talking about a vendor intentionally exposing data. We are talking about the places where modern systems accumulate state and where isolation mistakes happen. Shared caches can return the wrong object under rare keying or invalidation bugs. Shared KV stores can expose metadata through mis-scoped reads. Shared log aggregation can capture prompts, headers, and tokens in places broader than intended. Shared observability pipelines can make sensitive payloads visible to internal roles that should not see them. Each of these risks can be reduced with disciplined engineering. None of them disappear simply because the architecture is labeled multi-tenant.</p>
+      <p>The third is blast radius from upstream provider controls. Many shared gateways pool provider access behind the vendor&#x27;s own accounts with OpenAI, Anthropic, Google, or OpenRouter. If one tenant triggers an abuse review, quota clamp, or policy flag on that shared account, the impact does not stay neatly inside that tenant&#x27;s lane. Other customers can inherit throttling, degraded availability, or hard failures because they were all sitting behind the same credential set and the same provider relationship. This is an underappreciated shared-tenancy problem. The risk is not just your own behavior. It is everyone else&#x27;s.</p>
+      <h2>What &quot;isolated instance&quot; means at Mist</h2>
+      <p>At Mist, isolated instance means one dedicated deployment per customer. Not a logical tenant in a larger pool, and not a namespace in a vendor-wide control plane that still shares the hot path. We deploy a separate instance for each customer, with its own process space, its own provider credentials, its own database, its own rate-limit buckets, and its own audit logs.</p>
+      <p>In practical terms, Customer A&#x27;s prompts never enter the same process memory as Customer B&#x27;s. They do not share an application worker. They do not share a Redis cache. They do not share a Postgres database. They do not share provider API credentials. They do not share rate limiting state. They do not share audit log storage. Above the physical hardware layer, there is no shared customer runtime.</p>
+      <p>This matters because isolation is strongest when it is structural, not just policy-based. If there is no second tenant in the deployment, then an entire class of tenancy bugs becomes irrelevant. There is no cross-tenant cache confusion because there is no shared cache. There is no accidental broad log query across multiple customers because the logs are per customer. There is no rate-limit interference from another tenant because the buckets are dedicated. There is no account-level provider blast radius from a stranger&#x27;s workload because provider credentials are not pooled across customers.</p>
+      <p>We still engineer for security inside each deployment. Dedicated infrastructure is not a substitute for access control, secrets handling, or audit discipline. It is the removal of a category of shared-state risk that multi-tenant systems inevitably carry.</p>
+      <h2>Why it matters for compliance</h2>
+      <p>Security architects already understand the technical argument. Compliance leads and auditors usually focus the discussion. In a SOC 2, HIPAA, or ISO 27001 review, one of the recurring questions is simple: who else can access this data, and what specifically prevents it from bleeding into another tenant&#x27;s environment?</p>
+      <p>In a shared-tenancy model, the answer is usually some form of logical isolation. The vendor explains tenant scoping, role-based access, encryption, internal policy, and test coverage. Those controls can be real and useful. But the answer still depends on the correctness of a shared system. The auditor is being asked to accept that the same runtime, the same stores, and the same pipelines are partitioned correctly at all times.</p>
+      <p>With an isolated instance, the answer is much cleaner. No other tenant exists in this deployment. There is no second customer&#x27;s prompt traffic in the application. There is no shared tenant table to scope correctly. There is no shared audit database where rows must be filtered perfectly. The control narrative becomes shorter, more concrete, and easier to verify.</p>
+      <p>That difference matters in a Type II audit. Auditors do not just ask what the design says. They ask what happened over time, how access was controlled in practice, and how exceptions were handled. An architecture that removes cross-tenant paths is materially easier to defend than one that relies on many small logical boundaries never failing under operational pressure.</p>
+      <h2>The cost tradeoff, honestly stated</h2>
+      <p>Isolated infrastructure costs more than shared infrastructure. We are not pretending otherwise. A dedicated deployment per customer means more infrastructure to provision, monitor, patch, and maintain. The unit economics are not the same as running one large shared gateway for everyone.</p>
+      <p>But for the enterprises we work with, the real comparison is usually not isolated versus shared in a vacuum. The real comparison is isolated managed infrastructure versus building an internal gateway from scratch. Once legal, security, platform, and compliance teams reject generic shared SaaS for production use, the fallback is often an in-house service. That means standing up request routing, provider failover, audit logging, secret management, per-team controls, regional deployment, and operational support. It also means months of engineering time and a permanent maintenance burden.</p>
+      <p>In that context, isolated instances are the rational middle path. You pay more than you would for the cheapest shared gateway. You pay far less, in both time and money, than building and operating your own enterprise-grade gateway stack. More importantly, you get an architecture that aligns with the reason the project exists in the first place: running production AI workloads without inheriting avoidable multi-tenant risk.</p>
+      <h2>What you actually get</h2>
+      <p>With Mist, each customer receives a per-customer deployment on dedicated infrastructure in Hetzner, AWS, or GCP, in the region the customer selects. The deployment runs in an isolated network namespace. Provider access uses per-customer OpenAI, Anthropic, or Google credentials held by Mist for that environment, not pooled vendor-wide credentials shared across unrelated tenants. Audit logging is stored in a dedicated Postgres instance for that customer.</p>
+      <p>This model also gives the customer a clean lifecycle boundary. If a customer decides to terminate infrastructure, we can shut down that deployment and provide a verifiable wipe certificate tied to that environment. That is much harder to express clearly in a shared system where storage, logs, and residual metadata often sit in vendor-wide services that continue to serve other tenants.</p>
+      <p>We built Mist this way because enterprise buyers eventually ask the same hard questions. What is shared? Where does my data go? Who else can affect my uptime? What exactly gets deleted when the contract ends? &quot;Dedicated deployment&quot; is not a slogan. It is the shortest accurate answer to those questions.</p>
+      <p>Shared tenancy is fine for dev tools and hobby projects. For production AI workloads that a regulator, auditor, or adversary will eventually examine, shared tenancy is a bet you do not have to make. We think the safer and more honest approach is to remove the shared tenancy problem at the architecture level.</p>
+    </div>
+
+    <div class="post-cta">
+      <h3>Talk to a Mist sales engineer.</h3>
+      <p>We will scope your migration, walk through the architecture, and quote your annual run rate against your current AI spend.</p>
+      <a href="../contact.html" class="btn btn-primary">Talk to Sales</a>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="../product.html">Routing</a></li>
+            <li><a href="../product.html#verification">Verification</a></li>
+            <li><a href="../product.html#audit">Audit</a></li>
+            <li><a href="../product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../security.html">Security</a></li>
+            <li><a href="../pricing.html">Pricing</a></li>
+            <li><a href="index.html">Blog</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="../legal/terms.html">Terms</a></li>
+            <li><a href="../legal/privacy.html">Privacy</a></li>
+            <li><a href="../legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

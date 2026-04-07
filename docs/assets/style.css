@@ -1,0 +1,390 @@
+/* docs.mist.llc — developer documentation
+   Inherits from parent mist.llc stylesheet.
+   Adds Stripe-style sidebar navigation + prose layout.
+*/
+
+@import url('../../assets/style.css');
+
+/* ---------- Docs shell ---------- */
+.docs-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 48px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+  align-items: start;
+}
+
+/* ---------- Sidebar ---------- */
+.docs-sidebar {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  padding-right: 16px;
+  border-right: 1px solid #e5e5e5;
+  font-size: 14px;
+}
+.docs-sidebar nav { display: block; }
+.docs-sidebar .nav-group {
+  margin-bottom: 24px;
+}
+.docs-sidebar .nav-group h4 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #737373;
+  margin: 0 0 8px;
+  padding: 0 12px;
+}
+.docs-sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.docs-sidebar li {
+  margin: 0;
+}
+.docs-sidebar a {
+  display: block;
+  padding: 6px 12px;
+  color: #262626;
+  font-weight: 500;
+  border-radius: 6px;
+  text-decoration: none;
+  line-height: 1.4;
+}
+.docs-sidebar a:hover {
+  background: #f5f5f5;
+  color: #0f172a;
+  text-decoration: none;
+}
+.docs-sidebar a.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* ---------- Main content column ---------- */
+.docs-main {
+  max-width: 760px;
+  min-width: 0;
+}
+.docs-main > header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e5e5;
+}
+.docs-main > header .crumb {
+  font-size: 13px;
+  color: #737373;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.docs-main h1 {
+  font-size: clamp(32px, 4vw, 44px);
+  letter-spacing: -0.025em;
+  margin-bottom: 12px;
+}
+.docs-main h2 {
+  font-size: 26px;
+  margin-top: 48px;
+  margin-bottom: 12px;
+  padding-top: 16px;
+  scroll-margin-top: 96px;
+}
+.docs-main h3 {
+  font-size: 19px;
+  margin-top: 32px;
+  margin-bottom: 10px;
+  scroll-margin-top: 96px;
+}
+.docs-main h4 {
+  font-size: 16px;
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+.docs-main .lede {
+  font-size: 19px;
+  color: #525252;
+  line-height: 1.55;
+}
+.docs-main p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #262626;
+  margin-bottom: 16px;
+}
+.docs-main ul, .docs-main ol {
+  margin: 0 0 16px 24px;
+  padding: 0;
+}
+.docs-main li {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #262626;
+  margin-bottom: 6px;
+}
+.docs-main strong { color: #0a0a0a; font-weight: 600; }
+.docs-main em { font-style: italic; }
+.docs-main a { color: #2563eb; }
+.docs-main a:hover { text-decoration: underline; }
+.docs-main code {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.9em;
+  color: #0f172a;
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+}
+.docs-main pre {
+  background: #0f172a;
+  color: #f1f5f9;
+  border-radius: 10px;
+  padding: 20px 24px;
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 13.5px;
+  line-height: 1.65;
+  overflow-x: auto;
+  margin: 16px 0 24px;
+}
+.docs-main pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* ---------- Callouts ---------- */
+.callout {
+  border-left: 4px solid #2563eb;
+  background: #eff6ff;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 20px 0;
+  font-size: 15px;
+  color: #1e3a8a;
+}
+.callout.warn {
+  border-left-color: #d97706;
+  background: #fffbeb;
+  color: #92400e;
+}
+.callout.danger {
+  border-left-color: #dc2626;
+  background: #fef2f2;
+  color: #991b1b;
+}
+.callout .callout-label {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 12px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* ---------- Endpoint block (API ref) ---------- */
+.endpoint {
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  margin: 24px 0 32px;
+  overflow: hidden;
+}
+.endpoint-header {
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-size: 14px;
+}
+.method {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+.method.get { background: #16a34a; }
+.method.post { background: #2563eb; }
+.method.put { background: #d97706; }
+.method.delete { background: #dc2626; }
+.endpoint-path { color: #0f172a; font-weight: 600; }
+.endpoint-body {
+  padding: 20px;
+}
+.endpoint-body p { font-size: 15px; }
+
+/* ---------- Param table ---------- */
+.param-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 24px;
+  font-size: 14px;
+}
+.param-table th {
+  background: #f8fafc;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e5e5;
+  font-weight: 600;
+  color: #0a0a0a;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.param-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: top;
+  color: #262626;
+}
+.param-table td code { font-size: 13px; }
+.param-table .required {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #dc2626;
+  letter-spacing: 0.06em;
+  margin-left: 6px;
+}
+.param-table .type {
+  color: #737373;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+}
+
+/* ---------- Quick-links grid (landing) ---------- */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 32px 0 48px;
+}
+.quick-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 24px;
+  background: #ffffff;
+  transition: border-color .15s ease, transform .15s ease;
+  text-decoration: none;
+  display: block;
+}
+.quick-card:hover {
+  border-color: #2563eb;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+.quick-card h3 {
+  font-size: 17px;
+  color: #0a0a0a;
+  margin-bottom: 6px;
+}
+.quick-card p {
+  font-size: 14px;
+  color: #525252;
+  margin: 0;
+  line-height: 1.5;
+}
+.quick-card .arrow {
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+/* ---------- Page footer nav (prev/next) ---------- */
+.page-nav {
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.page-nav a {
+  display: block;
+  padding: 14px 18px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #0a0a0a;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 220px;
+  transition: border-color .15s ease, background .15s ease;
+}
+.page-nav a:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  text-decoration: none;
+}
+.page-nav .direction {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #737373;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.page-nav .next { text-align: right; margin-left: auto; }
+
+/* ---------- Tab bar for language examples ---------- */
+.lang-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #e5e5e5;
+  margin: 20px 0 0;
+}
+.lang-tabs button {
+  background: transparent;
+  border: none;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #525252;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.lang-tabs button.active {
+  color: #0f172a;
+  border-bottom-color: #0f172a;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .docs-shell {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px 20px 64px;
+  }
+  .docs-sidebar {
+    position: relative;
+    top: 0;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #e5e5e5;
+    padding-right: 0;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+  .quick-grid { grid-template-columns: 1fr; }
+  .docs-main h1 { font-size: 30px; }
+}
+@media (max-width: 560px) {
+  .page-nav { flex-direction: column; }
+  .page-nav .next { text-align: left; margin-left: 0; }
+}

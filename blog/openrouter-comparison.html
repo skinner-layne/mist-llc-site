@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="OpenRouter is excellent for developers and prototypes. For SOC 2 and HIPAA workloads, the design tradeoffs eventually require a different vendor. An honest comparison from a different lane.">
+  <title>What OpenRouter Gets Right (And What They Miss) — Mist Dynamics</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .post {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 64px 24px 96px;
+    }
+    .post .post-meta {
+      font-size: 14px;
+      color: #737373;
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+    .post .post-meta span + span::before {
+      content: " · ";
+      color: #d4d4d4;
+    }
+    .post h1 {
+      font-size: clamp(32px, 5vw, 48px);
+      letter-spacing: -0.025em;
+      margin-bottom: 32px;
+    }
+    .post h2 {
+      font-size: 24px;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      letter-spacing: -0.015em;
+    }
+    .post p {
+      font-size: 18px;
+      line-height: 1.75;
+      color: #262626;
+      margin-bottom: 20px;
+    }
+    .post .post-back {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #525252;
+      margin-bottom: 32px;
+    }
+    .post .post-back:hover {
+      color: #0f172a;
+      text-decoration: none;
+    }
+    .post-cta {
+      margin-top: 64px;
+      padding: 32px;
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .post-cta h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+    .post-cta p {
+      font-size: 16px;
+      color: #525252;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Blog</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <article class="post">
+    <a href="index.html" class="post-back">&larr; All posts</a>
+    <span class="eyebrow">Comparison</span>
+    <h1>What OpenRouter Gets Right (And What They Miss)</h1>
+    <div class="post-meta">
+      <span>April 7, 2026</span>
+      <span>4 min read</span>
+      <span>Mist Dynamics</span>
+    </div>
+
+    <div class="post-body">
+      <p>OpenRouter solved a real problem for developers. One API, one billing relationship, and access to a long list of major models without opening accounts with each provider. That is a real improvement over the fragmented state of the model ecosystem, and it is why so many developers adopted it so quickly. We use OpenRouter ourselves in some contexts, and we understand the appeal firsthand.</p>
+      <p>This is important to say clearly at the start: OpenRouter is a good product. It is well designed for the audience it serves. Our view at Mist Dynamics LLC is not that OpenRouter is flawed. It is that it is built for a different use case than the one many enterprise teams eventually reach.</p>
+      <h2>What OpenRouter gets right</h2>
+      <p>OpenRouter is a brilliant piece of infrastructure for indie developers, hobbyists, and early-stage startups. If you are trying to ship an AI feature quickly, it removes a lot of friction. You do not need to create separate provider accounts, manage separate billing setups, or rewrite your integration every time you want to compare models.</p>
+      <p>The product choices are thoughtful. Pricing is transparent. The UX is clean. The documentation is solid. The model catalog is broad enough that most developers can test and iterate without worrying about the plumbing underneath.</p>
+      <p>For a solo founder prototyping a feature, OpenRouter is often the correct default choice. It gets you to working code fast. It keeps the operational burden low. It gives you flexibility at the exact stage when flexibility matters most.</p>
+      <p>That is not a small achievement. In practice, OpenRouter has helped standardize access to a messy market. It made experimentation easier, and that benefited the broader developer ecosystem.</p>
+      <h2>The shared-tenancy architecture</h2>
+      <p>The core design is straightforward: OpenRouter routes all customers through shared infrastructure and maintains one set of provider credentials per upstream model. For its audience, this is the right architecture.</p>
+      <p>That design has clear advantages. It supports cheap marginal pricing. It makes onboarding fast. It allows broad model coverage without asking each customer to negotiate and configure every upstream provider individually. These are good tradeoffs for developers who want convenience and speed.</p>
+      <p>But architecture is always a set of tradeoffs. In a shared-tenancy system, your prompts and traffic patterns exist within the same overall service boundary as every other OpenRouter customer. That means shared process space, shared rate-limit buckets, and shared abuse-reporting lineage at the upstream level.</p>
+      <p>To be clear, this does not mean OpenRouter is careless. Logical isolation is a normal and valid design for many SaaS products. It is how a large part of modern software works. The point is not that the design is wrong. The point is that it answers a different set of requirements than many enterprise teams have.</p>
+      <h2>Where that architecture breaks for enterprise</h2>
+      <p>For regulated industries such as legal, financial services, and healthcare, the compliance question is usually not, &quot;Is OpenRouter well engineered?&quot; It is. The harder question is, &quot;Who else is on this infrastructure, and what prevents bleed?&quot;</p>
+      <p>In shared-tenancy SaaS, the answer is usually logical isolation. That can be perfectly acceptable for a developer tool. It is often less acceptable when AI workflows touch customer PII and need to stand up to a SOC 2 Type II audit, a HIPAA review, or a detailed vendor security assessment.</p>
+      <p>Security teams and auditors often want more than assurances about application controls. They want clear boundaries, defined counterparties, and infrastructure isolation that maps cleanly to the risk profile of the data. Once an organization reaches that stage, the conversation changes. The issue is no longer convenience. It is whether the architecture itself fits the procurement and compliance environment.</p>
+      <p>That is where an isolated-instance approach starts to matter.</p>
+      <h2>The routing ceiling</h2>
+      <p>OpenRouter does exactly what many developers want: if you ask for a given model, you get that model. That is useful and predictable. But it is important to recognize what this means. OpenRouter is a model aggregator, not a routing engine in the enterprise sense.</p>
+      <p>Enterprise workloads often need routing to make decisions on behalf of the system, not just pass through a user choice. You may want the cheapest capable model for each task type. You may want automatic failover when a provider has an outage or latency spike. You may want budget caps enforced at the routing layer, or task-specific policies that determine where sensitive requests can go.</p>
+      <p>Those requirements are less about access and more about control. They require the routing layer to be opinionated and programmable.</p>
+      <p>That is one of the places Mist is different. We are built around intelligent routing for production workloads, especially where cost, reliability, and policy enforcement need to be handled centrally rather than by application teams one integration at a time.</p>
+      <h2>The DPA and contracting gap</h2>
+      <p>There is also the legal and procurement side. Enterprise buying requires a counterparty that can sign a DPA, sign a BAA where relevant, appear by name on an MSA, and accept liability in a way that matches the risk involved.</p>
+      <p>OpenRouter&#x27;s terms of service are reasonable for its market. But many enterprise legal teams need more than standard online terms. They need negotiated agreements, defined responsibilities, and a vendor structure that fits formal procurement.</p>
+      <p>Mist Dynamics LLC is built for that process. We sign enterprise contracts as a named counterparty, with the documentation and contractual commitments those teams expect.</p>
+      <h2>Who should use what, honestly</h2>
+      <p>If you are a solo developer, an indie hacker, a prototype team, or an early startup without enterprise customers, use OpenRouter. It is faster, simpler, and often cheaper at small volumes. Its design is correct for that stage.</p>
+      <p>If you are running AI workloads that fall under SOC 2, HIPAA, ISO 27001, or enterprise procurement requirements, you will probably outgrow that model. At that point, you need an isolated-instance vendor, a real DPA, a named counterparty, and routing that does more than forward requests. That is what Mist is for.</p>
+      <p>We are not competing with OpenRouter in the broad sense. We serve the customer OpenRouter explicitly does not target, and they serve the customer we would be overkill for. Both products make sense in their lane. The important thing is to use the right tool for your stage.</p>
+    </div>
+
+    <div class="post-cta">
+      <h3>Talk to a Mist sales engineer.</h3>
+      <p>We will scope your migration, walk through the architecture, and quote your annual run rate against your current AI spend.</p>
+      <a href="../contact.html" class="btn btn-primary">Talk to Sales</a>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="../product.html">Routing</a></li>
+            <li><a href="../product.html#verification">Verification</a></li>
+            <li><a href="../product.html#audit">Audit</a></li>
+            <li><a href="../product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../security.html">Security</a></li>
+            <li><a href="../pricing.html">Pricing</a></li>
+            <li><a href="index.html">Blog</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="../legal/terms.html">Terms</a></li>
+            <li><a href="../legal/privacy.html">Privacy</a></li>
+            <li><a href="../legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Get from zero to a working Mist API call in five minutes. Includes curl example and SDK install.">
+  <title>Quickstart — Mist Docs</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar">
+      <nav>
+        <div class="nav-group">
+          <h4>Get started</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="getting-started.html" class="active">Quickstart</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Concepts</h4>
+          <ul>
+            <li><a href="routing.html">How routing works</a></li>
+            <li><a href="verification.html">Prism verification</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Reference</h4>
+          <ul>
+            <li><a href="api-reference.html">API reference</a></li>
+            <li><a href="sdks.html">SDKs</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>More</h4>
+          <ul>
+            <li><a href="../index.html">Back to mist.llc</a></li>
+            <li><a href="../contact.html">Talk to sales</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="docs-main">
+      <header>
+        <div class="crumb">GET STARTED</div>
+        <h1>Five-minute quickstart</h1>
+        <p class="lede">Make your first request to the Mist API, then switch to your own key. Everything you need is on this page.</p>
+      </header>
+
+      <section>
+        <h2>What you'll do</h2>
+        <p>Send a chat completion request to Mist using a demo key, then swap in your own API key.</p>
+      </section>
+
+      <section>
+        <h2>Prerequisites</h2>
+        <ul>
+          <li>A terminal with <code>curl</code> installed (or any HTTP client)</li>
+          <li>Optional: Python 3.9+, Node.js 18+, or Go 1.21+ if you prefer using an SDK</li>
+          <li>About five minutes</li>
+        </ul>
+        <p>This quickstart uses a public demo key that allows 10 requests per IP per hour. For higher limits, contact <a href="../contact.html">sales</a>.</p>
+      </section>
+
+      <section>
+        <h2>1. Make your first request</h2>
+        <p>Send the following request to the OpenAI-compatible chat completions endpoint. The demo key is rate-limited, but it is enough to verify connectivity and inspect the response format.</p>
+        <pre><code>curl https://api.mist.llc/v1/chat/completions \
+  -H "Authorization: Bearer mist_demo_pk_public_quickstart" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "auto",
+    "messages": [
+      {"role": "user", "content": "In one sentence, what is Mist?"}
+    ]
+  }'</code></pre>
+        <p>When <code>"model"</code> is set to <code>"auto"</code>, Mist picks the cheapest capable model for the request. You can also pass a specific model name like <code>"gpt-4o-mini"</code> or <code>"claude-3-5-sonnet"</code> — see the <a href="routing.html">routing guide</a> for details.</p>
+      </section>
+
+      <section>
+        <h2>2. Understand the response</h2>
+        <p>The response uses a familiar chat completions envelope. Notice that the returned <code>model</code> is a concrete provider model even though the request asked for <code>"auto"</code>.</p>
+        <pre><code>{
+  "id": "req_01hzk8m7r4w2n9d5c6b3a1f0e",
+  "object": "chat.completion",
+  "created": 1762483200,
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Mist is an API gateway that routes AI requests across multiple model providers through one OpenAI-compatible endpoint."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 17,
+    "completion_tokens": 22,
+    "total_tokens": 39
+  }
+}</code></pre>
+        <ul>
+          <li><code>id</code> — unique request identifier; include this when contacting support</li>
+          <li><code>model</code> — the actual model that served the request (not necessarily what you asked for, when using <code>"auto"</code>)</li>
+          <li><code>choices[0].message.content</code> — the model output</li>
+          <li><code>usage</code> — token counts; this is what you'll be billed for</li>
+          <li><code>x-mist-request-id</code> (header) — same as <code>id</code>, also returned in response headers</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>3. Use your own API key</h2>
+        <p>Replace the demo key with your production key once you are ready to test under your own account. Production keys are issued by sales; contact <a href="../contact.html">Mist</a> to obtain one. API keys look like <code>mist_live_pk_...</code> for production and <code>mist_test_pk_...</code> for the test environment.</p>
+        <pre><code>curl https://api.mist.llc/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "auto",
+    "messages": [
+      {"role": "user", "content": "In one sentence, what is Mist?"}
+    ]
+  }'</code></pre>
+      </section>
+
+      <section>
+        <h2>4. Install an SDK (optional)</h2>
+
+        <h3>Python</h3>
+        <pre><code>pip install mist</code></pre>
+        <pre><code>from mist import Mist
+client = Mist(api_key="mist_live_pk_...")
+response = client.chat.completions.create(model="auto", messages=[{"role":"user","content":"hello"}])
+print(response.choices[0].message.content)</code></pre>
+
+        <h3>Node.js</h3>
+        <pre><code>npm install @mist/sdk</code></pre>
+        <pre><code>import Mist from "@mist/sdk";
+const client = new Mist({ apiKey: "mist_live_pk_..." });
+const response = await client.chat.completions.create({ model: "auto", messages: [{ role: "user", content: "hello" }] });
+console.log(response.choices[0].message.content);</code></pre>
+
+        <h3>Go</h3>
+        <pre><code>go get mist.llc/mist-go</code></pre>
+        <pre><code>client := mist.NewClient("mist_live_pk_...")
+response, err := client.Chat.Completions.Create(
+    context.Background(),
+    mist.ChatCompletionRequest{Model: "auto", Messages: []mist.Message{{Role: "user", Content: "hello"}}},
+)
+fmt.Println(response.Choices[0].Message.Content)</code></pre>
+      </section>
+
+      <section>
+        <h2>5. Migrating from OpenAI?</h2>
+        <div class="callout">
+          <p>Because Mist is OpenAI-compatible, you can use the official OpenAI SDK and just change the base URL.</p>
+          <pre><code>OpenAI(base_url="https://api.mist.llc/v1", api_key="mist_live_pk_...")</code></pre>
+          <p>This is the fastest path to production for teams already using OpenAI directly.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Next steps</h2>
+        <p>Once you have a successful response, the next step is usually to decide how you want routing, verification, and language-specific integration to work in your environment.</p>
+        <ul>
+          <li>Read <a href="routing.html">how routing works</a> to understand task types and fallback chains</li>
+          <li>Read <a href="verification.html">about Prism verification</a> for cross-model fact-checking</li>
+          <li>Browse the <a href="api-reference.html">complete API reference</a></li>
+          <li>Pick a language and read the <a href="sdks.html">SDK documentation</a></li>
+        </ul>
+      </section>
+
+      <nav class="page-nav">
+        <a href="index.html" class="prev"><span class="direction">Previous</span>Overview</a>
+        <a href="routing.html" class="next"><span class="direction">Next</span>How routing works</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

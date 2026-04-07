@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="How Mist sends every verified prompt to three different model providers, compares outputs semantically, and flags disagreement before it reaches production.">
+  <title>How Cross-Model Verification Works (And Why You Should Care) — Mist Dynamics</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .post {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 64px 24px 96px;
+    }
+    .post .post-meta {
+      font-size: 14px;
+      color: #737373;
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+    .post .post-meta span + span::before {
+      content: " · ";
+      color: #d4d4d4;
+    }
+    .post h1 {
+      font-size: clamp(32px, 5vw, 48px);
+      letter-spacing: -0.025em;
+      margin-bottom: 32px;
+    }
+    .post h2 {
+      font-size: 24px;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      letter-spacing: -0.015em;
+    }
+    .post p {
+      font-size: 18px;
+      line-height: 1.75;
+      color: #262626;
+      margin-bottom: 20px;
+    }
+    .post .post-back {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #525252;
+      margin-bottom: 32px;
+    }
+    .post .post-back:hover {
+      color: #0f172a;
+      text-decoration: none;
+    }
+    .post-cta {
+      margin-top: 64px;
+      padding: 32px;
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .post-cta h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+    .post-cta p {
+      font-size: 16px;
+      color: #525252;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Blog</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <article class="post">
+    <a href="index.html" class="post-back">&larr; All posts</a>
+    <span class="eyebrow">Verification</span>
+    <h1>How Cross-Model Verification Works (And Why You Should Care)</h1>
+    <div class="post-meta">
+      <span>April 7, 2026</span>
+      <span>6 min read</span>
+      <span>Mist Dynamics</span>
+    </div>
+
+    <div class="post-body">
+      <p>A lawyer filed a brief that cited cases that did not exist. The model had produced clean Bluebook-style citations, plausible quotations, and confident legal reasoning. It looked right until someone checked. In a demo, that kind of failure is embarrassing. In production, it is liability. The same pattern shows up outside law: a financial summary that moves a decimal point and turns millions into tens of millions, or a clinical workflow that suggests the wrong dosage. The problem is not that language models sometimes say strange things. The problem is that they say wrong things fluently enough to pass review.</p>
+      <h2>The single-model problem</h2>
+      <p>A lot of production LLM systems still rely on a simple pattern: send one prompt to one model, get one answer, and trust it unless a human notices something odd. That pattern is inherently fragile.</p>
+      <p>The reason is basic. These models are trained to predict plausible next tokens, not to maintain an internal notion of truth. They are optimized for fluency, coherence, and usefulness as judged by training data and post-training feedback. Sometimes that aligns with correctness. Sometimes it does not. A model can produce an answer that is articulate, internally consistent, and completely false.</p>
+      <p>This is the central operational fact technical leaders need to keep in view: fluency and correctness are orthogonal dimensions. One does not imply the other. In practice, fluent wrong answers are more dangerous than clumsy wrong answers because they are easier to trust.</p>
+      <p>A single model also has a deeper limitation. It has no reliable built-in mechanism for knowing when it is wrong. It can express uncertainty in words, but that uncertainty is itself generated text, not an external check. If the model fabricates a case citation, a policy reference, or a product spec, it usually does not have a second system standing behind it saying, no, that object does not exist.</p>
+      <p>Many teams try retries as a safety measure. That helps less than people hope. If you ask the same model the same question three times, you do not get three independent votes. You get three correlated samples from the same training lineage with the same blind spots. The wording may change, but the failure mode often does not. When a model has the wrong internal association, retries tend to produce variations of the same mistake.</p>
+      <h2>The cross-model intuition</h2>
+      <p>Cross-model verification starts from a simple observation. Different models make different mistakes.</p>
+      <p>If two or three models that were trained by different providers, on different datasets, with different post-training methods, independently arrive at the same answer, the probability that they are all hallucinating the same wrong answer is usually lower than the probability that any one of them is wrong alone. Errors tend to be idiosyncratic. Truth tends to be shared.</p>
+      <p>This is not a new idea in machine learning. Ensemble methods have been useful for years because combining multiple imperfect systems often produces a more reliable result than trusting one system in isolation. What changes with LLMs is the object being compared. We are not averaging numeric predictions. We are comparing claims, code behavior, extracted entities, and reasoning traces that are expressed in natural language.</p>
+      <p>The intuition is especially strong for factual prompts. If one model invents a legal citation, another may fail in a different way, or say it cannot verify. If all three independently produce the same case name, date, and holding, confidence should go up. Not to certainty, but materially up.</p>
+      <h2>How Mist implements it</h2>
+      <p>We call the technique cross-model verification. In plain terms, every verified prompt is sent to three different providers from three different training lineages. Depending on the workload, that might mean one model from OpenAI, one from Anthropic, and one from Google. In other cases, we mix by capability: a reasoning-oriented model, a code-oriented model, and a general-purpose model.</p>
+      <p>We then compare the outputs using a task-specific agreement layer. If the answers agree, we return the agreed result with a verified flag. If they disagree, we do not pretend they agreed. We surface the disagreement.</p>
+      <p>What happens next depends on the customer’s configuration and the risk level of the endpoint. In some cases, we return all three outputs with a warning so the application or operator can decide what to do. In others, we escalate to a fourth model as a tiebreaker. For the highest-stakes workflows, we send disagreements to a human reviewer.</p>
+      <p>That last part matters. Verification is not just an inference trick. It is a routing protocol. The goal is not only to improve answer quality when models converge, but also to detect uncertainty and handle it deliberately when they do not.</p>
+      <h2>What “agreement” means</h2>
+      <p>This is the hard part.</p>
+      <p>Agreement is not string matching. If one model says “The contract was signed on March 3, 2021” and another says “Execution occurred on 2021-03-03,” those outputs agree. If one says revenue was $12.4 million and another says $124 million, they do not, even if the surrounding paragraph is nearly identical. A naive implementation misses both cases.</p>
+      <p>So we treat agreement as a semantic comparison problem. For factual answers, we extract the claims that matter: dates, names, quantities, identifiers, references. Then we compare those claims directly. For code, we care less about exact syntax and more about behavior. Does the code compile? Does it pass the same tests? Does it produce the same outputs on representative inputs? For longer prose, we compare the key claims and conclusions, not the exact wording.</p>
+      <p>This comparison layer is where most naive implementations fail. It sounds easy until you build it. Models paraphrase. They compress or expand. They hedge in one sentence and assert in another. They may agree on the answer but disagree on the rationale, or vice versa. Production verification needs a claim extraction and normalization layer that is robust enough to catch substantive disagreement without treating harmless rephrasing as conflict.</p>
+      <p>In our experience, this comparison logic is the real engineering work. The idea of asking multiple models is simple. Determining whether they actually agree is not.</p>
+      <h2>What it costs and why that is the right tradeoff</h2>
+      <p>Cross-model verification costs more than a single call. Roughly speaking, you are paying for three model invocations instead of one, and sometimes a fourth if you use a tiebreaker. For many prompts, that is unnecessary. If the task is drafting low-risk marketing copy or summarizing an internal meeting, full verification may be wasteful.</p>
+      <p>But cost needs to be measured against consequence. For medical, legal, financial, or safety-critical outputs, the marginal token spend is small compared to the cost of one confident wrong answer making it into a customer workflow, a filing, or a business decision. A 3x inference bill is often trivial next to compliance exposure, support burden, rework, or reputational damage.</p>
+      <p>That is why we do not recommend verification everywhere. We recommend it where error has real cost. Customers choose per endpoint which prompts get verified and what should happen when models disagree.</p>
+      <h2>What it won’t catch</h2>
+      <p>Cross-model verification reduces hallucination risk. It does not eliminate it.</p>
+      <p>If all three models share the same bad assumption from their training data, they may agree and still be wrong. Shared bias is real. If a source fact changed recently and the models all have stale knowledge, agreement will not save you. If the prompt itself is ambiguous or underspecified, agreement may simply reflect a common interpretation, not correctness.</p>
+      <p>There is also a category of problems where the answer is not a fact to be recovered but a judgment to be made. In those cases, model agreement can be useful as a signal of consistency, but it is not proof that the judgment is right.</p>
+      <p>So we think of verification as a risk reduction mechanism, not a truth machine. It narrows one important failure mode: the single fluent model confidently inventing an answer without any independent check.</p>
+      <p>Verification is not magic. It is an engineering discipline applied to a substrate optimized for plausible language. For workloads where wrong answers have real consequences, that distinction matters. The difference between one model speaking confidently and several independent models converging on the same claim is the difference between a liability you hope nobody notices and a system you can actually deploy.</p>
+    </div>
+
+    <div class="post-cta">
+      <h3>Talk to a Mist sales engineer.</h3>
+      <p>We will scope your migration, walk through the architecture, and quote your annual run rate against your current AI spend.</p>
+      <a href="../contact.html" class="btn btn-primary">Talk to Sales</a>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="../product.html">Routing</a></li>
+            <li><a href="../product.html#verification">Verification</a></li>
+            <li><a href="../product.html#audit">Audit</a></li>
+            <li><a href="../product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../security.html">Security</a></li>
+            <li><a href="../pricing.html">Pricing</a></li>
+            <li><a href="index.html">Blog</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="../legal/terms.html">Terms</a></li>
+            <li><a href="../legal/privacy.html">Privacy</a></li>
+            <li><a href="../legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

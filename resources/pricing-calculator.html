@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="cube-address" content="110.000.111">
+  <title>Reseller P&L Calculator — Mist Dynamics</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-dark: #2c5282;
+      --text: #1f2937;
+      --text-light: #4b5563;
+      --border: #e5e7eb;
+      --bg: #ffffff;
+      --bg-light: #f9fafb;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.6;
+    }
+    .nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      background-color: var(--bg);
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+    .brand-sub {
+      font-weight: 400;
+      color: var(--text);
+    }
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    h1 {
+      color: var(--primary-dark);
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      color: var(--primary-dark);
+      font-size: 1.4rem;
+      margin: 1.5rem 0 0.5rem;
+    }
+    .subheader {
+      color: var(--text-light);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    .calculator-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    @media (min-width: 768px) {
+      .calculator-container {
+        flex-direction: row;
+      }
+    }
+    .inputs {
+      flex: 1;
+      background-color: var(--bg-light);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: var(--shadow);
+    }
+    .output {
+      flex: 1;
+      background-color: var(--bg-light);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: var(--shadow);
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      background-color: white;
+      font-size: 1rem;
+    }
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .slider-value {
+      text-align: right;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+    .bold {
+      font-weight: 700;
+    }
+    .section {
+      margin-top: 1rem;
+    }
+    .footer-note {
+      margin-top: 3rem;
+      font-size: 0.875rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="/" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+    </div>
+  </header>
+
+  <main>
+    <h1>Waterlight Sovereignty Reseller Economics</h1>
+    <p class="subheader">Model your P&L as a Sovereign reseller. Adjust patron counts and tier to see net earnings in real time.</p>
+
+    <div class="calculator-container">
+      <div class="inputs">
+        <div class="form-group">
+          <label for="tier">Tier</label>
+          <select id="tier">
+            <option value="sovereignty">Sovereignty ($500/mo)</option>
+            <option value="pro">Sovereignty Pro ($2000/mo)</option>
+            <option value="enterprise">Sovereignty Enterprise ($5000/mo)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Initiate Patrons</label>
+          <div class="slider-container">
+            <input type="range" id="initiate" min="0" max="200" value="30" />
+            <div class="slider-value"><span id="initiate-value">30</span></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Practitioner Patrons</label>
+          <div class="slider-container">
+            <input type="range" id="practitioner" min="0" max="200" value="15" />
+            <div class="slider-value"><span id="practitioner-value">15</span></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Scholar Patrons</label>
+          <div class="slider-container">
+            <input type="range" id="scholar" min="0" max="100" value="5" />
+            <div class="slider-value"><span id="scholar-value">5</span></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Average Usage Fraction</label>
+          <div class="slider-container">
+            <input type="range" id="usage" min="10" max="100" value="70" step="1" />
+            <div class="slider-value"><span id="usage-value">0.7</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="output">
+        <h2>Profit & Loss</h2>
+        <table id="pnl-table">
+          <tbody>
+            <tr>
+              <th colspan="3">REVENUE</th>
+            </tr>
+            <tr>
+              <td>Initiate ($20)</td>
+              <td id="initiate-count">30</td>
+              <td id="initiate-revenue">$600</td>
+            </tr>
+            <tr>
+              <td>Practitioner ($50)</td>
+              <td id="practitioner-count">15</td>
+              <td id="practitioner-revenue">$750</td>
+            </tr>
+            <tr>
+              <td>Scholar ($150)</td>
+              <td id="scholar-count">5</td>
+              <td id="scholar-revenue">$750</td>
+            </tr>
+            <tr class="bold">
+              <td>Gross Revenue</td>
+              <td></td>
+              <td id="gross-revenue">$2,100</td>
+            </tr>
+
+            <tr class="section">
+              <th colspan="3">COSTS</th>
+            </tr>
+            <tr>
+              <td>Mist Subscription</td>
+              <td></td>
+              <td id="subscription-cost">$500</td>
+            </tr>
+            <tr>
+              <td>Token Compute Usage</td>
+              <td></td>
+              <td id="token-cost">$105</td>
+            </tr>
+            <tr>
+              <td>Overage</td>
+              <td></td>
+              <td id="overage-cost">$0</td>
+            </tr>
+            <tr class="bold">
+              <td>Total Mist Cost</td>
+              <td></td>
+              <td id="total-mist-cost">$605</td>
+            </tr>
+
+            <tr class="section">
+              <th colspan="3">TITHE</th>
+            </tr>
+            <tr>
+              <td>10% of Gross</td>
+              <td></td>
+              <td id="tithe-cost">$210</td>
+            </tr>
+
+            <tr class="section">
+              <th colspan="3">NET TO SOVEREIGN</th>
+            </tr>
+            <tr class="bold">
+              <td>Net Profit</td>
+              <td></td>
+              <td id="net-profit">$1,285</td>
+            </tr>
+            <tr>
+              <td>Margin</td>
+              <td></td>
+              <td id="margin">61.2%</td>
+            </tr>
+
+            <tr class="section">
+              <th colspan="3">BREAKEVEN</th>
+            </tr>
+            <tr>
+              <td>Minimum Patron Count</td>
+              <td></td>
+              <td id="breakeven">12</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="footer-note">Wholesale rates, tithe rates, and tier pricing are from the Reseller Pricing Template. Actual Sovereign earnings depend on customer acquisition, retention, and domain-specific pricing.</p>
+  </main>
+
+  <script>
+    // DOM elements
+    const tierSelect = document.getElementById('tier');
+    const initiateSlider = document.getElementById('initiate');
+    const practitionerSlider = document.getElementById('practitioner');
+    const scholarSlider = document.getElementById('scholar');
+    const usageSlider = document.getElementById('usage');
+    
+    const initiateValue = document.getElementById('initiate-value');
+    const practitionerValue = document.getElementById('practitioner-value');
+    const scholarValue = document.getElementById('scholar-value');
+    const usageValue = document.getElementById('usage-value');
+    
+    // Output elements
+    const initiateCountEl = document.getElementById('initiate-count');
+    const practitionerCountEl = document.getElementById('practitioner-count');
+    const scholarCountEl = document.getElementById('scholar-count');
+    
+    const initiateRevenueEl = document.getElementById('initiate-revenue');
+    const practitionerRevenueEl = document.getElementById('practitioner-revenue');
+    const scholarRevenueEl = document.getElementById('scholar-revenue');
+    const grossRevenueEl = document.getElementById('gross-revenue');
+    
+    const subscriptionCostEl = document.getElementById('subscription-cost');
+    const tokenCostEl = document.getElementById('token-cost');
+    const overageCostEl = document.getElementById('overage-cost');
+    const totalMistCostEl = document.getElementById('total-mist-cost');
+    
+    const titheCostEl = document.getElementById('tithe-cost');
+    const netProfitEl = document.getElementById('net-profit');
+    const marginEl = document.getElementById('margin');
+    const breakevenEl = document.getElementById('breakeven');
+
+    // Constants
+    const TIER_CONFIG = {
+      sovereignty: { price: 500, includedCompute: 100 },
+      pro: { price: 2000, includedCompute: 400 },
+      enterprise: { price: 5000, includedCompute: 1000 }
+    };
+
+    const PATRON_PRICES = {
+      initiate: 20,
+      practitioner: 50,
+      scholar: 150
+    };
+
+    // Token allocations per patron (in thousands)
+    const PATRON_TOKENS = {
+      initiate: { turbo: 500 },
+      practitioner: { turbo: 2000, flagship: 200 },
+      scholar: { turbo: 5000, flagship: 1000, reason: 200 }
+    };
+
+    // Wholesale rates per 1M tokens
+    const RATES = {
+      flash: 0.10,
+      turbo: 0.30,
+      flagship: 2.00,
+      reason: 5.00
+    };
+
+    function updateValues() {
+      // Get current values
+      const tier = tierSelect.value;
+      const initiateCount = parseInt(initiateSlider.value);
+      const practitionerCount = parseInt(practitionerSlider.value);
+      const scholarCount = parseInt(scholarSlider.value);
+      const usageFraction = parseFloat((parseInt(usageSlider.value) / 100).toFixed(2));
+      
+      // Update displayed values
+      initiateValue.textContent = initiateCount;
+      practitionerValue.textContent = practitionerCount;
+      scholarValue.textContent = scholarCount;
+      usageValue.textContent = usageFraction.toFixed(1);
+      
+      // Update patron counts in table
+      initiateCountEl.textContent = initiateCount;
+      practitionerCountEl.textContent = practitionerCount;
+      scholarCountEl.textContent = scholarCount;
+      
+      // Calculate gross revenue
+      const initiateRevenue = initiateCount * PATRON_PRICES.initiate;
+      const practitionerRevenue = practitionerCount * PATRON_PRICES.practitioner;
+      const scholarRevenue = scholarCount * PATRON_PRICES.scholar;
+      const grossRevenue = initiateRevenue + practitionerRevenue + scholarRevenue;
+      
+      // Update revenue display
+      initiateRevenueEl.textContent = formatCurrency(initiateRevenue);
+      practitionerRevenueEl.textContent = formatCurrency(practitionerRevenue);
+      scholarRevenueEl.textContent = formatCurrency(scholarRevenue);
+      grossRevenueEl.textContent = formatCurrency(grossRevenue);
+      
+      // Calculate token usage
+      let totalTokenCost = 0;
+      
+      // Initiate: 500K Turbo
+      totalTokenCost += (initiateCount * PATRON_TOKENS.initiate.turbo * usageFraction * RATES.turbo) / 1000;
+      
+      // Practitioner: 2M Turbo + 200K Flagship
+      totalTokenCost += (practitionerCount * PATRON_TOKENS.practitioner.turbo * usageFraction * RATES.turbo) / 1000;
+      totalTokenCost += (practitionerCount * PATRON_TOKENS.practitioner.flagship * usageFraction * RATES.flagship) / 1000;
+      
+      // Scholar: 5M Turbo + 1M Flagship + 200K Reason
+      totalTokenCost += (scholarCount * PATRON_TOKENS.scholar.turbo * usageFraction * RATES.turbo) / 1000;
+      totalTokenCost += (scholarCount * PATRON_TOKENS.scholar.flagship * usageFraction * RATES.flagship) / 1000;
+      totalTokenCost += (scholarCount * PATRON_TOKENS.scholar.reason * usageFraction * RATES.reason) / 1000;
+      
+      // Calculate Mist costs
+      const subscriptionCost = TIER_CONFIG[tier].price;
+      const includedCompute = TIER_CONFIG[tier].includedCompute;
+      const overageCost = Math.max(0, totalTokenCost - includedCompute);
+      const totalMistCost = subscriptionCost + overageCost;
+      
+      // Calculate tithe (10% of gross)
+      const titheCost = grossRevenue * 0.10;
+      
+      // Calculate net profit
+      const netProfit = grossRevenue - totalMistCost - titheCost;
+      const margin = grossRevenue > 0 ? (netProfit / grossRevenue) * 100 : 0;
+      
+      // Calculate breakeven (minimum patron count to cover subscription)
+      // We need to find the minimum number of patrons such that revenue >= subscription cost + tithe
+      // Since tithe is 10% of revenue, we need: revenue * 0.9 >= subscription cost
+      // So revenue >= subscription cost / 0.9
+      const minRevenue = subscriptionCost / 0.9;
+      
+      // Calculate minimum patron count (assuming all patrons are the cheapest type)
+      const minPatronCount = Math.ceil(minRevenue / PATRON_PRICES.initiate);
+      
+      // Update display
+      subscriptionCostEl.textContent = formatCurrency(subscriptionCost);
+      tokenCostEl.textContent = formatCurrency(totalTokenCost);
+      overageCostEl.textContent = formatCurrency(overageCost);
+      totalMistCostEl.textContent = formatCurrency(totalMistCost);
+      titheCostEl.textContent = formatCurrency(titheCost);
+      netProfitEl.textContent = formatCurrency(netProfit);
+      marginEl.textContent = `${margin.toFixed(1)}%`;
+      breakevenEl.textContent = minPatronCount;
+    }
+    
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+    
+    // Add event listeners
+    tierSelect.addEventListener('change', updateValues);
+    initiateSlider.addEventListener('input', updateValues);
+    practitionerSlider.addEventListener('input', updateValues);
+    scholarSlider.addEventListener('input', updateValues);
+    usageSlider.addEventListener('input', () => {
+      usageValue.textContent = (parseInt(usageSlider.value) / 100).toFixed(1);
+    });
+    usageSlider.addEventListener('change', updateValues);
+    
+    // Initial calculation
+    updateValues();
+  </script>
+</body>
+</html>

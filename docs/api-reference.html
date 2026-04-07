@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Mist API reference. Authentication, request and response format, and the /chat/completions endpoint.">
+  <title>API Reference — Mist Docs</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar">
+      <nav>
+        <div class="nav-group">
+          <h4>Get started</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="getting-started.html">Quickstart</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Concepts</h4>
+          <ul>
+            <li><a href="routing.html">How routing works</a></li>
+            <li><a href="verification.html">Prism verification</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Reference</h4>
+          <ul>
+            <li><a href="api-reference.html" class="active">API reference</a></li>
+            <li><a href="sdks.html">SDKs</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>More</h4>
+          <ul>
+            <li><a href="../index.html">Back to mist.llc</a></li>
+            <li><a href="../contact.html">Talk to sales</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="docs-main">
+      <header>
+        <div class="crumb">REFERENCE</div>
+        <h1>API reference</h1>
+        <p class="lede">Mist exposes an OpenAI-compatible REST API. This page covers authentication and the chat completions endpoint. Additional endpoints will be documented as they ship.</p>
+      </header>
+
+      <section>
+        <h2>Base URL</h2>
+        <p>The production base URL is <code>https://api.mist.llc/v1</code>. The test environment is <code>https://api-test.mist.llc/v1</code>. All endpoints in this reference are relative to that base.</p>
+      </section>
+
+      <section>
+        <h2>Authentication</h2>
+        <p>Authenticate every request with a bearer token in the <code>Authorization</code> header: <code>Authorization: Bearer YOUR_API_KEY</code>. Production keys use the prefix <code>mist_live_pk_...</code>. Test keys use the prefix <code>mist_test_pk_...</code>.</p>
+        <p>API keys are provisioned by sales and can be rotated through the dashboard. Use separate keys for production and test environments to keep traffic and billing boundaries clear.</p>
+
+        <div class="callout warn">
+          <strong>Security</strong>
+          <p>Never embed API keys in client-side code or public repositories. All API access should be server to server.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Request format</h2>
+        <p>Requests use JSON over HTTPS. Unless noted otherwise, send the following headers with each request.</p>
+
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Header</th>
+              <th>Required</th>
+              <th>Value</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Authorization</code></td>
+              <td>Yes</td>
+              <td><code>Bearer YOUR_API_KEY</code></td>
+              <td>Bearer token for the target environment.</td>
+            </tr>
+            <tr>
+              <td><code>Content-Type</code></td>
+              <td>Yes</td>
+              <td><code>application/json</code></td>
+              <td>Required for JSON request bodies.</td>
+            </tr>
+            <tr>
+              <td><code>Idempotency-Key</code></td>
+              <td>No</td>
+              <td>string</td>
+              <td>Optional key, maximum 256 characters. Use a UUID. Replays within 24 hours return the cached response.</td>
+            </tr>
+            <tr>
+              <td><code>X-Request-ID</code></td>
+              <td>No</td>
+              <td>string</td>
+              <td>Caller-supplied request ID. If omitted, Mist generates one.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Response format</h2>
+        <p>Every response is a JSON object. Successful responses follow the OpenAI response envelope. Errors return a JSON object with an <code>error</code> field. Standard response headers include <code>X-Mist-Request-ID</code>, <code>X-Mist-Model</code> (the actual model that served the request), <code>X-Mist-Latency-Ms</code>, and <code>X-RateLimit-Remaining</code>.</p>
+      </section>
+
+      <section>
+        <h2>Endpoints</h2>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/v1/chat/completions</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Generate a chat completion. OpenAI-compatible — drop-in replacement for the OpenAI <code>chat.completions.create</code> endpoint, with optional Mist-specific fields for routing and verification.</p>
+
+            <h3>Request body</h3>
+            <table class="param-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Required</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>model</code></td>
+                  <td><span class="type">string</span></td>
+                  <td>Yes</td>
+                  <td>Model identifier. Use <code>"auto"</code> to let Mist pick. Pass a specific model name (for example, <code>"gpt-4o-mini"</code>, <code>"claude-3-5-sonnet"</code>) to pin to one provider.</td>
+                </tr>
+                <tr>
+                  <td><code>messages</code></td>
+                  <td><span class="type">array</span></td>
+                  <td>Yes</td>
+                  <td>List of message objects with <code>role</code> (<code>system</code>|<code>user</code>|<code>assistant</code>) and <code>content</code> (string).</td>
+                </tr>
+                <tr>
+                  <td><code>task_type</code></td>
+                  <td><span class="type">string</span></td>
+                  <td>No</td>
+                  <td>Mist-specific routing hint. One of: <code>reasoning</code>, <code>code</code>, <code>creative</code>, <code>summarization</code>, <code>quick_response</code>, etc. See <a href="routing.html">routing</a>.</td>
+                </tr>
+                <tr>
+                  <td><code>temperature</code></td>
+                  <td><span class="type">number</span></td>
+                  <td>No</td>
+                  <td>Sampling temperature, 0.0–2.0. Default 1.0.</td>
+                </tr>
+                <tr>
+                  <td><code>max_tokens</code></td>
+                  <td><span class="type">integer</span></td>
+                  <td>No</td>
+                  <td>Maximum tokens in the response.</td>
+                </tr>
+                <tr>
+                  <td><code>stream</code></td>
+                  <td><span class="type">boolean</span></td>
+                  <td>No</td>
+                  <td>If true, returns a server-sent event stream.</td>
+                </tr>
+                <tr>
+                  <td><code>verification</code></td>
+                  <td><span class="type">string</span></td>
+                  <td>No</td>
+                  <td>Mist-specific. One of: <code>none</code> (default), <code>single</code>, <code>prism</code>. See <a href="verification.html">verification</a>.</td>
+                </tr>
+                <tr>
+                  <td><code>fallback_chain</code></td>
+                  <td><span class="type">array</span></td>
+                  <td>No</td>
+                  <td>Mist-specific. Ordered list of model names to try if the first fails.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>Example request</h3>
+            <pre><code>curl https://api.mist.llc/v1/chat/completions \
+  -H "Authorization: Bearer mist_live_pk_..." \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: 6b1dcfa3-1f46-4bdb-a0c5-2a0bc2e6d3f7" \
+  -d '{
+    "model": "auto",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain why connection pooling matters for high-throughput APIs."
+      }
+    ],
+    "task_type": "reasoning",
+    "temperature": 0.2,
+    "max_tokens": 300
+  }'</code></pre>
+
+            <h3>Response</h3>
+            <table class="param-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td><span class="type">string</span></td>
+                  <td>Unique identifier for the completion.</td>
+                </tr>
+                <tr>
+                  <td><code>object</code></td>
+                  <td><span class="type">string</span></td>
+                  <td>Always <code>"chat.completion"</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>created</code></td>
+                  <td><span class="type">integer</span></td>
+                  <td>Unix timestamp in seconds.</td>
+                </tr>
+                <tr>
+                  <td><code>model</code></td>
+                  <td><span class="type">string</span></td>
+                  <td>The model that actually served the request.</td>
+                </tr>
+                <tr>
+                  <td><code>choices</code></td>
+                  <td><span class="type">array</span></td>
+                  <td>Array of completion choices containing message objects and finish reasons.</td>
+                </tr>
+                <tr>
+                  <td><code>usage</code></td>
+                  <td><span class="type">object</span></td>
+                  <td>Token accounting with <code>prompt_tokens</code>, <code>completion_tokens</code>, and <code>total_tokens</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>mist_metadata</code></td>
+                  <td><span class="type">object</span></td>
+                  <td>Mist-specific metadata containing <code>request_id</code>, <code>routed_to</code>, <code>latency_ms</code>, and <code>cost_usd</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>Example response</h3>
+            <pre><code>{
+  "id": "chatcmpl_01JY7Q8W3P9H2K4M6N8R0T1V",
+  "object": "chat.completion",
+  "created": 1775518412,
+  "model": "claude-3-5-sonnet",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Connection pooling reduces the overhead of creating and tearing down database or upstream connections for every request. In high-throughput APIs, that lowers latency, reduces CPU spent on handshakes, and helps keep connection limits under control. It also improves stability during traffic spikes because the application can reuse a bounded set of warm connections instead of opening many new ones at once."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 19,
+    "completion_tokens": 58,
+    "total_tokens": 77
+  },
+  "mist_metadata": {
+    "request_id": "req_01JY7Q8W7X2P4S6T8U9V0W1X",
+    "routed_to": "claude-3-5-sonnet",
+    "latency_ms": 842,
+    "cost_usd": 0.00194
+  }
+}</code></pre>
+
+            <h3>Errors</h3>
+            <ul>
+              <li><code>400 invalid_request</code> — malformed body or unknown model</li>
+              <li><code>401 unauthorized</code> — missing or invalid API key</li>
+              <li><code>429 rate_limit_exceeded</code> — your account exceeded its per-minute or per-day quota; retry after the time in the <code>Retry-After</code> header</li>
+              <li><code>503 upstream_unavailable</code> — every model in the fallback chain failed; retry the request</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Errors</h2>
+        <p>Global errors use a consistent envelope.</p>
+        <pre><code>{
+  "error": {
+    "code": "rate_limit_exceeded",
+    "message": "Your account exceeded 60 requests per minute on this endpoint.",
+    "request_id": "req_01HF...",
+    "retry_after_ms": 1200
+  }
+}</code></pre>
+        <p>Always log <code>error.request_id</code> when handling failures. That ID is the fastest way for Mist support to locate the request in internal logs. If the error includes <code>retry_after_ms</code> or a <code>Retry-After</code> header, use that value rather than a fixed retry interval. For high-volume integrations, treat <code>429</code> and <code>503</code> as retryable and apply backoff with jitter.</p>
+      </section>
+
+      <section>
+        <h2>What's next</h2>
+        <div class="callout">
+          <p>This is a stub reference covering the most important endpoint. Verification primitives, audit endpoints, and admin endpoints will be documented as they ship. To get notified, contact <a href="../contact.html">sales</a> or watch the changelog.</p>
+        </div>
+      </section>
+
+      <nav class="page-nav">
+        <a href="verification.html" class="prev"><span class="direction">Previous</span>Prism verification</a>
+        <a href="sdks.html" class="next"><span class="direction">Next</span>SDKs</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

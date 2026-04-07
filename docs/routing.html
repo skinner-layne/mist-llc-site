@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Conceptual guide to Mist routing. Task types, fallback chains, model selection, and how Mist picks the cheapest capable provider for each request.">
+  <title>How routing works — Mist Docs</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar">
+      <nav>
+        <div class="nav-group">
+          <h4>Get started</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="getting-started.html">Quickstart</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Concepts</h4>
+          <ul>
+            <li><a href="routing.html" class="active">How routing works</a></li>
+            <li><a href="verification.html">Prism verification</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Reference</h4>
+          <ul>
+            <li><a href="api-reference.html">API reference</a></li>
+            <li><a href="sdks.html">SDKs</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>More</h4>
+          <ul>
+            <li><a href="../index.html">Back to mist.llc</a></li>
+            <li><a href="../contact.html">Talk to sales</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="docs-main">
+      <header>
+        <div class="crumb">CONCEPTS</div>
+        <h1>How routing works</h1>
+        <p class="lede">Mist routes each request to the cheapest model that can handle it, with automatic failover when a provider degrades. This page explains how that decision gets made.</p>
+      </header>
+
+      <section>
+        <h2>The mental model</h2>
+        <p>Mist sits between your application and more than 20 model providers. Your application sends one request to the Mist API, and Mist decides where to send it upstream. The primary input to that decision is the task type: a hint you include in the request body to describe the kind of work being done. Mist looks up that task type in a routing table, which maps it to an ordered chain of provider and model candidates, then dispatches to the first entry in the chain.</p>
+        <p>If the selected provider returns an error, is rate-limited, or times out, Mist retries against the next entry in the chain without requiring any change in your client code. Your application receives either one successful response or one terminal error after the chain is exhausted. This is not magic: the routing table is configurable, fallback behavior is documented, and every routing decision is logged in the audit trail so you can query it later by <code>request_id</code>.</p>
+      </section>
+
+      <section>
+        <h2>Task types</h2>
+        <p>Mist supports 47 task types organized into seven tiers. The task type is a hint your application passes in the request body. If you do not provide one, Mist uses a sensible default: <code>default</code>, which maps to a fast general-purpose model. If you do provide a hint, Mist selects from a curated chain of models chosen for that task class.</p>
+
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Task type (code)</th>
+              <th>Description</th>
+              <th>Typical first-choice model</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>reasoning</code></td>
+              <td>Complex chain-of-thought, math, planning</td>
+              <td>frontier reasoning model</td>
+            </tr>
+            <tr>
+              <td><code>code</code></td>
+              <td>Code generation and refactoring</td>
+              <td>specialized code model</td>
+            </tr>
+            <tr>
+              <td><code>creative</code></td>
+              <td>Long-form writing, marketing copy</td>
+              <td>large general model</td>
+            </tr>
+            <tr>
+              <td><code>quick_response</code></td>
+              <td>Triage, classification, short answers</td>
+              <td>fast inference model</td>
+            </tr>
+            <tr>
+              <td><code>summarization</code></td>
+              <td>Document and conversation summarization</td>
+              <td>fast general model</td>
+            </tr>
+            <tr>
+              <td><code>vision</code></td>
+              <td>Multimodal image understanding</td>
+              <td>vision-capable model</td>
+            </tr>
+            <tr>
+              <td><code>web_search</code></td>
+              <td>Queries that require live web data</td>
+              <td>search-augmented model</td>
+            </tr>
+            <tr>
+              <td><code>default</code></td>
+              <td>General-purpose, no special hint</td>
+              <td>balanced general model</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>The exact provider and model mapping is defined in the live routing table and may change as upstream vendors ship new models, change pricing, or degrade in production.</p>
+      </section>
+
+      <section>
+        <h2>Fallback chains</h2>
+        <p>Every task type maps to an ordered chain of model candidates. That chain is the failover path. If the first model errors, times out, or returns an unparseable response, Mist automatically tries the next model in the sequence, then the next, until one succeeds or the chain is exhausted.</p>
+        <ol>
+          <li>HTTP 5xx from the upstream provider</li>
+          <li>HTTP 429 (rate limit) from the upstream provider</li>
+          <li>Connection timeout (configurable, default 60s)</li>
+          <li>Empty or malformed response body</li>
+          <li>Provider explicit "service degraded" signal</li>
+        </ol>
+        <p>By contrast, 4xx errors caused by your request are not retried. If you send invalid input, an unsupported parameter, or a malformed payload, Mist returns that error directly to your application. Only failures attributable to the provider trigger fallback.</p>
+      </section>
+
+      <section>
+        <h2>Picking a specific model</h2>
+        <p>If you do not want routing, pass a concrete model name in the <code>model</code> field. Mist will dispatch directly to that model and only that model. Fallback is disabled in this mode unless you also pass an explicit <code>fallback_chain</code> array. Use direct model selection when you have a hard dependency on a model's behavior or when you are benchmarking across providers.</p>
+      </section>
+
+      <section>
+        <h2>Cost optimization</h2>
+        <p>The default routing tier balances cost and quality. If you want strict cost minimization, use <code>task_type: "quick_response"</code> for work that does not require deeper reasoning. If you want strict quality maximization, use <code>task_type: "reasoning"</code> even for simpler prompts, understanding that this usually increases cost and latency.</p>
+        <div class="callout">
+          <p>Most teams see 30–60% cost reduction in the first month just by switching their non-critical traffic to <code>quick_response</code>. Reserve <code>reasoning</code> for the queries where being right matters more than being cheap.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Rate limits and quotas</h2>
+        <p>Each API key has a per-minute and per-day request quota negotiated at sales. When you exceed the quota, Mist returns <code>429</code> with a <code>Retry-After</code> header in milliseconds. Rate limits are per key, not per endpoint. Enterprise contracts include burst headroom; talk to <a href="../contact.html">sales</a> if you need a custom limit.</p>
+      </section>
+
+      <section>
+        <h2>Audit trail</h2>
+        <p>Every routing decision is logged with the request ID, the task type you sent, the chain Mist evaluated, the model that ultimately served, the latency, and the cost. The log is retained per your contract and exportable to your SIEM.</p>
+      </section>
+
+      <section>
+        <h2>Common patterns</h2>
+        <ul>
+          <li>Pin critical paths to a specific model with <code>model: "..."</code> and a custom <code>fallback_chain</code></li>
+          <li>Tag every request with a <code>task_type</code> hint for routing precision</li>
+          <li>Use <code>Idempotency-Key</code> headers for safe retries</li>
+          <li>Set conservative <code>max_tokens</code> to bound cost</li>
+          <li>Subscribe to the audit log webhook for real-time observability</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Next: verification</h2>
+        <p>Routing is how Mist picks a model; <a href="verification.html">verification</a> is how Mist checks whether the model was right.</p>
+      </section>
+
+      <nav class="page-nav">
+        <a href="getting-started.html" class="prev"><span class="direction">Previous</span>Quickstart</a>
+        <a href="verification.html" class="next"><span class="direction">Next</span>Prism verification</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

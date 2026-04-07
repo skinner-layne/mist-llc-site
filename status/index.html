@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111, 110.001.110">
+  <meta name="description" content="Mist Dynamics system status. Real-time health of the Mist routing platform and upstream model providers.">
+  <title>Mist Dynamics — System Status</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* Status-page specific additions (extends mist-llc-site/assets/style.css) */
+    .status-hero {
+      padding: 72px 0 48px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .status-overall {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 24px 28px;
+      border-radius: 14px;
+      border: 1px solid #e5e5e5;
+      background: #fafafa;
+      margin-top: 32px;
+    }
+    .status-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: #a3a3a3;
+      box-shadow: 0 0 0 4px rgba(163, 163, 163, 0.15);
+    }
+    .status-dot.operational { background: #16a34a; box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15); }
+    .status-dot.degraded    { background: #d97706; box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15); }
+    .status-dot.major       { background: #dc2626; box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15); }
+    .status-headline {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0a0a0a;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    .status-sub {
+      font-size: 14px;
+      color: #525252;
+      margin-top: 4px;
+    }
+    .provider-table-wrap {
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 32px 0 48px;
+      background: #ffffff;
+    }
+    .provider-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    .provider-table th, .provider-table td {
+      text-align: left;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .provider-table th {
+      background: #fafafa;
+      font-weight: 600;
+      color: #0a0a0a;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .provider-table tr:last-child td { border-bottom: none; }
+    .provider-name {
+      font-weight: 600;
+      color: #0a0a0a;
+    }
+    .provider-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .provider-status .status-dot {
+      width: 10px;
+      height: 10px;
+      box-shadow: none;
+    }
+    .provider-status.operational { color: #15803d; }
+    .provider-status.degraded    { color: #b45309; }
+    .provider-status.down        { color: #b91c1c; }
+    .provider-status.unknown     { color: #737373; }
+    .latency {
+      font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+      font-size: 13px;
+      color: #525252;
+    }
+    .last-check {
+      font-size: 13px;
+      color: #737373;
+    }
+    .status-notes {
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-top: 32px;
+    }
+    .status-notes h3 {
+      font-size: 15px;
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+    .status-notes p {
+      color: #525252;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .status-notes p:last-child { margin-bottom: 0; }
+    .refresh-note {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #737373;
+      text-align: center;
+    }
+    @media (max-width: 720px) {
+      .provider-table th:nth-child(4),
+      .provider-table td:nth-child(4) { display: none; }
+      .status-hero { padding: 48px 0 32px; }
+      .status-overall { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAV ===== -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">
+        Mist<span class="brand-sub">Dynamics</span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ===== STATUS HERO ===== -->
+  <section class="status-hero">
+    <div class="container">
+      <span class="eyebrow">System Status</span>
+      <h1>Mist Dynamics Platform</h1>
+      <p class="lead">Real-time health of the Mist routing fabric and upstream model providers. Updated every 5 minutes.</p>
+
+      <div class="status-overall" id="overall-status">
+        <div class="status-dot" id="overall-dot"></div>
+        <div>
+          <p class="status-headline" id="overall-headline">Checking status&hellip;</p>
+          <p class="status-sub" id="overall-sub">Loading latest health data</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROVIDER TABLE ===== -->
+  <section style="padding-top:56px;padding-bottom:24px;">
+    <div class="container">
+      <span class="eyebrow">Upstream Providers</span>
+      <h2 class="section-title">Provider health</h2>
+      <p class="section-lead">When any provider degrades, Mist automatically routes traffic to healthy alternatives. Customers should see no service impact unless multiple providers in the same task tier degrade simultaneously.</p>
+
+      <div class="provider-table-wrap">
+        <table class="provider-table">
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Status</th>
+              <th>Latency</th>
+              <th>Last check</th>
+            </tr>
+          </thead>
+          <tbody id="provider-tbody">
+            <tr data-provider="openai">
+              <td class="provider-name">OpenAI</td>
+              <td><span class="provider-status unknown"><span class="status-dot"></span>Checking&hellip;</span></td>
+              <td class="latency">&mdash;</td>
+              <td class="last-check">&mdash;</td>
+            </tr>
+            <tr data-provider="anthropic">
+              <td class="provider-name">Anthropic</td>
+              <td><span class="provider-status unknown"><span class="status-dot"></span>Checking&hellip;</span></td>
+              <td class="latency">&mdash;</td>
+              <td class="last-check">&mdash;</td>
+            </tr>
+            <tr data-provider="google">
+              <td class="provider-name">Google</td>
+              <td><span class="provider-status unknown"><span class="status-dot"></span>Checking&hellip;</span></td>
+              <td class="latency">&mdash;</td>
+              <td class="last-check">&mdash;</td>
+            </tr>
+            <tr data-provider="mistral">
+              <td class="provider-name">Mistral</td>
+              <td><span class="provider-status unknown"><span class="status-dot"></span>Checking&hellip;</span></td>
+              <td class="latency">&mdash;</td>
+              <td class="last-check">&mdash;</td>
+            </tr>
+            <tr data-provider="deepseek">
+              <td class="provider-name">DeepSeek</td>
+              <td><span class="provider-status unknown"><span class="status-dot"></span>Checking&hellip;</span></td>
+              <td class="latency">&mdash;</td>
+              <td class="last-check">&mdash;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="status-notes">
+        <h3>About this page</h3>
+        <p>This status page reflects direct health checks against each upstream provider's inference endpoint. A provider marked <strong>operational</strong> is responding to minimal requests within expected latency bounds. A provider marked <strong>degraded</strong> is responding with elevated latency or intermittent errors. A provider marked <strong>down</strong> is failing health checks entirely.</p>
+        <p>Mist Dynamics abstracts provider instability via automatic failover across fallback chains. In most cases, customer traffic continues uninterrupted even when an individual provider is down. For incident updates and scheduled maintenance, subscribe to status notifications at <a href="../contact.html">contact.mist.llc</a>.</p>
+        <p class="refresh-note">Data refreshes automatically every 60 seconds. Source: <code>status.json</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="../product.html">Routing</a></li>
+            <li><a href="../product.html#verification">Verification</a></li>
+            <li><a href="../product.html#audit">Audit</a></li>
+            <li><a href="../product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../security.html">Security</a></li>
+            <li><a href="../pricing.html">Pricing</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="../legal/terms.html">Terms</a></li>
+            <li><a href="../legal/privacy.html">Privacy</a></li>
+            <li><a href="../legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== STATUS RENDER SCRIPT ===== -->
+  <script>
+    // Status rendering logic. Reads status.json (written by
+    // mist/tools/provider_health_check.py) and updates DOM elements.
+    // If status.json is missing or stale, displays a clear fallback.
+
+    const STATUS_URL = 'status.json';
+    const REFRESH_MS = 60 * 1000;
+
+    const STATUS_LABEL = {
+      operational: 'Operational',
+      degraded:    'Degraded performance',
+      down:        'Major outage',
+      unknown:     'Unknown',
+      auth_failed: 'Auth failed'
+    };
+
+    function humanTime(iso) {
+      if (!iso) return '—';
+      try {
+        const d = new Date(iso);
+        const now = new Date();
+        const diffMs = now - d;
+        const diffMin = Math.floor(diffMs / 60000);
+        if (diffMin < 1) return 'just now';
+        if (diffMin < 60) return diffMin + ' min ago';
+        const diffHr = Math.floor(diffMin / 60);
+        if (diffHr < 24) return diffHr + ' hr ago';
+        return d.toISOString().split('T')[0];
+      } catch (_) {
+        return iso;
+      }
+    }
+
+    function renderOverall(data) {
+      const dot = document.getElementById('overall-dot');
+      const headline = document.getElementById('overall-headline');
+      const sub = document.getElementById('overall-sub');
+      if (!data) {
+        dot.className = 'status-dot';
+        headline.textContent = 'Status data unavailable';
+        sub.textContent = 'Could not load status.json — check back shortly.';
+        return;
+      }
+      const overall = data.overall_status || 'unknown';
+      dot.className = 'status-dot ' + (
+        overall === 'operational' ? 'operational' :
+        overall === 'degraded'    ? 'degraded' :
+        overall === 'major_outage' ? 'major' : ''
+      );
+      if (overall === 'operational') {
+        headline.textContent = 'All systems operational';
+      } else if (overall === 'degraded') {
+        headline.textContent = 'Degraded performance on some providers';
+      } else if (overall === 'major_outage') {
+        headline.textContent = 'Major outage on multiple providers';
+      } else {
+        headline.textContent = 'Status unknown';
+      }
+      const s = data.summary || {};
+      const total = s.total || 0;
+      const up = s.operational || 0;
+      sub.textContent = up + '/' + total + ' providers operational — last updated ' + humanTime(data.generated_at);
+    }
+
+    function renderProvider(p) {
+      const row = document.querySelector('tr[data-provider="' + p.name + '"]');
+      if (!row) return;
+      const statusCell = row.querySelector('.provider-status');
+      const latencyCell = row.querySelector('.latency');
+      const lastCheckCell = row.querySelector('.last-check');
+      const status = p.status || 'unknown';
+      const cssClass = (status === 'operational' || status === 'degraded' || status === 'down') ? status : 'unknown';
+      statusCell.className = 'provider-status ' + cssClass;
+      statusCell.innerHTML = '<span class="status-dot ' + (cssClass === 'operational' ? 'operational' : cssClass === 'degraded' ? 'degraded' : cssClass === 'down' ? 'major' : '') + '"></span>' + (STATUS_LABEL[status] || status);
+      latencyCell.textContent = (p.latency_ms != null) ? (p.latency_ms + ' ms') : '—';
+      lastCheckCell.textContent = humanTime(p.last_check);
+    }
+
+    async function refresh() {
+      try {
+        const resp = await fetch(STATUS_URL + '?t=' + Date.now(), { cache: 'no-store' });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        renderOverall(data);
+        (data.providers || []).forEach(renderProvider);
+      } catch (e) {
+        renderOverall(null);
+      }
+    }
+
+    refresh();
+    setInterval(refresh, REFRESH_MS);
+  </script>
+
+</body>
+</html>

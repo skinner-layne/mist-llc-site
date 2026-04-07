@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Official Mist client libraries. Python is generally available; Node.js and Go are in private preview.">
+  <title>SDKs — Mist Docs</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar">
+      <nav>
+        <div class="nav-group">
+          <h4>Get started</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="getting-started.html">Quickstart</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Concepts</h4>
+          <ul>
+            <li><a href="routing.html">How routing works</a></li>
+            <li><a href="verification.html">Prism verification</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Reference</h4>
+          <ul>
+            <li><a href="api-reference.html">API reference</a></li>
+            <li><a href="sdks.html" class="active">SDKs</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>More</h4>
+          <ul>
+            <li><a href="../index.html">Back to mist.llc</a></li>
+            <li><a href="../contact.html">Talk to sales</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="docs-main">
+      <header>
+        <div class="crumb">REFERENCE</div>
+        <h1>SDKs and client libraries</h1>
+        <p class="lede">Mist offers official client libraries for the languages enterprise teams use most. Or use the OpenAI client library you already have — Mist is fully OpenAI-compatible.</p>
+      </header>
+
+      <section>
+        <h2>Choose your path</h2>
+        <p>You have three supported integration options: use the official Mist SDK for your language, use the OpenAI client library with Mist's base URL set, or call the REST API directly with curl or your HTTP library of choice. For new projects, use the Mist SDK. For migrations, using the OpenAI client is often the fastest path. All three options are supported. The Mist SDK adds typed access to Mist-specific fields such as verification tiers, task types, prism_metadata, and fallback chains, while the OpenAI client works for everything that is OpenAI-compatible.</p>
+      </section>
+
+      <section>
+        <h2>Status</h2>
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Language</th>
+              <th>Status</th>
+              <th>Install command</th>
+              <th>Repository</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Python</td>
+              <td>General availability</td>
+              <td><code>pip install mist</code></td>
+              <td><code>github.com/mist-llc/mist-python</code></td>
+            </tr>
+            <tr>
+              <td>Node.js / TypeScript</td>
+              <td>Private preview</td>
+              <td><code>npm install @mist/sdk</code></td>
+              <td><code>github.com/mist-llc/mist-node</code></td>
+            </tr>
+            <tr>
+              <td>Go</td>
+              <td>Private preview</td>
+              <td><code>go get mist.llc/mist-go</code></td>
+              <td><code>github.com/mist-llc/mist-go</code></td>
+            </tr>
+            <tr>
+              <td>Rust</td>
+              <td>Planned</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Java</td>
+              <td>Planned</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout">
+          <p>"Private preview" means the SDK works and is supported for design partners, but the API surface may change before general availability. Talk to <a href="../contact.html">sales</a> for access.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Python</h2>
+        <p>The Python SDK is the most complete Mist client today and is the recommended choice for production Python services.</p>
+        <p>Install: <code>pip install mist</code></p>
+        <pre><code>from mist import Mist
+
+client = Mist(api_key="mist_live_pk_...")
+
+response = client.chat.completions.create(
+    model="auto",
+    task_type="reasoning",
+    messages=[
+        {"role": "user", "content": "Explain quicksort in two sentences."}
+    ],
+)
+
+print(response.choices[0].message.content)
+print(response.mist_metadata.routed_to)</code></pre>
+        <p>The client is thread-safe. Async support is available via <code>from mist import AsyncMist</code>. If no key is passed explicitly, the SDK reads <code>MIST_API_KEY</code> automatically.</p>
+      </section>
+
+      <section>
+        <h2>Node.js / TypeScript</h2>
+        <p>The Node.js SDK exposes the same API shape as the HTTP service with typed request and response objects for Mist-specific fields.</p>
+        <p>Install: <code>npm install @mist/sdk</code></p>
+        <pre><code>import Mist from "@mist/sdk";
+
+const client = new Mist({ apiKey: process.env.MIST_API_KEY });
+
+const response = await client.chat.completions.create({
+  model: "auto",
+  task_type: "code",
+  messages: [
+    { role: "user", content: "Write a TypeScript function that debounces a callback." },
+  ],
+});
+
+console.log(response.choices[0].message.content);
+console.log(response.mist_metadata.routed_to);</code></pre>
+        <p>The SDK is fully typed. ESM and CommonJS are both supported. It works in Node.js 18+ and modern bundlers. Browser usage is not supported because API keys must remain server-side.</p>
+      </section>
+
+      <section>
+        <h2>Go</h2>
+        <p>The Go SDK is designed around standard Go patterns and is a good fit for backend services that need explicit context propagation and straightforward error handling.</p>
+        <p>Install: <code>go get mist.llc/mist-go</code></p>
+        <pre><code>package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "mist.llc/mist-go"
+)
+
+func main() {
+    client := mist.NewClient("mist_live_pk_...")
+
+    resp, err := client.ChatCompletions.Create(context.Background(), &mist.ChatCompletionRequest{
+        Model:    "auto",
+        TaskType: "summarization",
+        Messages: []mist.Message{
+            {Role: "user", Content: "Summarize this changelog: ..."},
+        },
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println(resp.Choices[0].Message.Content)
+}</code></pre>
+        <p>The SDK is context-aware, returns errors directly, and does not use panics in the happy path. It works with Go 1.21+.</p>
+      </section>
+
+      <section>
+        <h2>Using the OpenAI client library</h2>
+        <p>If you already use the official OpenAI SDKs, migration can be as simple as changing the base URL and API key. Mist speaks the OpenAI API, so existing call sites often need little or no structural change.</p>
+        <pre><code>from openai import OpenAI
+client = OpenAI(
+    base_url="https://api.mist.llc/v1",
+    api_key="mist_live_pk_...",
+)</code></pre>
+        <pre><code>import OpenAI from "openai";
+const client = new OpenAI({
+  baseURL: "https://api.mist.llc/v1",
+  apiKey: process.env.MIST_API_KEY,
+});</code></pre>
+        <p>The trade-off is that the OpenAI client gives you a low-friction migration path, but it does not expose Mist-specific fields such as <code>verification</code> or <code>task_type</code> as native typed properties. You can still pass them through <code>extra_body</code> in Python or by extending the request object in TypeScript, but typed access requires a Mist SDK.</p>
+      </section>
+
+      <section>
+        <h2>Versioning</h2>
+        <p>SDK versions follow semantic versioning. Major version bumps are reserved for incompatible API changes, and those changes also require a corresponding API version bump on the server side. Minor version bumps add features without breaking existing code. Patch version bumps are limited to bug fixes and internal improvements.</p>
+        <p>Each repository includes its own compatibility matrix in the README, including the supported SDK versions, API versions, and minimum runtime requirements.</p>
+      </section>
+
+      <section>
+        <h2>Get help</h2>
+        <ul>
+          <li>Read the <a href="api-reference.html">API reference</a> for the underlying request and response shapes</li>
+          <li>Open an issue on the relevant GitHub repository</li>
+          <li>Talk to <a href="../contact.html">sales</a> for direct technical support under your contract</li>
+        </ul>
+      </section>
+
+      <nav class="page-nav">
+        <a href="api-reference.html" class="prev"><span class="direction">Previous</span>API reference</a>
+        
+      </nav>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

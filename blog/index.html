@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="The Mist Dynamics blog: technical writing on enterprise AI routing, isolated-instance architecture, cross-model verification, and AI vendor compliance.">
+  <title>Blog — Mist Dynamics</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+    @media (max-width: 720px) {
+      .blog-grid { grid-template-columns: 1fr; }
+    }
+    .post-card {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color .15s ease, transform .15s ease;
+    }
+    .post-card:hover {
+      text-decoration: none;
+      border-color: #0f172a;
+      transform: translateY(-2px);
+    }
+    .post-card h3 {
+      color: #0a0a0a;
+      margin-bottom: 12px;
+    }
+    .post-card p {
+      color: #525252;
+      font-size: 15px;
+      flex-grow: 1;
+      margin-bottom: 16px;
+    }
+    .post-card-meta {
+      font-size: 13px;
+      color: #737373;
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .post-card-meta span + span::before {
+      content: " · ";
+      color: #d4d4d4;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Blog</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="hero" style="padding-bottom:32px;">
+    <div class="container">
+      <span class="eyebrow">Blog</span>
+      <h1>Notes on enterprise AI infrastructure.</h1>
+      <p class="lead">Technical writing on routing, verification, isolated-instance architecture, and the compliance details that decide whether an AI vendor survives procurement.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="container">
+      <div class="blog-grid">
+        <a href="why-isolated-instances.html" class="card post-card">
+          <span class="eyebrow">Architecture</span>
+          <h3>Why We Use Isolated Instances Instead of Shared Infrastructure</h3>
+          <p>Why Mist Dynamics deploys a dedicated instance per customer instead of multi-tenant SaaS, and what shared tenancy quietly costs production AI workloads.</p>
+          <div class="post-card-meta">
+            <span>April 7, 2026</span>
+            <span>5 min read</span>
+          </div>
+        </a>
+        <a href="cross-model-verification.html" class="card post-card">
+          <span class="eyebrow">Verification</span>
+          <h3>How Cross-Model Verification Works (And Why You Should Care)</h3>
+          <p>How Mist sends every verified prompt to three different model providers, compares outputs semantically, and flags disagreement before it reaches production.</p>
+          <div class="post-card-meta">
+            <span>April 7, 2026</span>
+            <span>6 min read</span>
+          </div>
+        </a>
+        <a href="openrouter-comparison.html" class="card post-card">
+          <span class="eyebrow">Comparison</span>
+          <h3>What OpenRouter Gets Right (And What They Miss)</h3>
+          <p>OpenRouter is excellent for developers and prototypes. For SOC 2 and HIPAA workloads, the design tradeoffs eventually require a different vendor. An honest comparison from a different lane.</p>
+          <div class="post-card-meta">
+            <span>April 7, 2026</span>
+            <span>4 min read</span>
+          </div>
+        </a>
+        <a href="series-llc-compliance.html" class="card post-card">
+          <span class="eyebrow">Compliance</span>
+          <h3>Series LLC Structure for AI Infrastructure: Why It Matters for Your Compliance</h3>
+          <p>Most AI vendors are a single legal entity holding every customer on one balance sheet. The Delaware Series LLC offers a structurally cleaner answer to vendor concentration risk.</p>
+          <div class="post-card-meta">
+            <span>April 7, 2026</span>
+            <span>6 min read</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="../product.html">Routing</a></li>
+            <li><a href="../product.html#verification">Verification</a></li>
+            <li><a href="../product.html#audit">Audit</a></li>
+            <li><a href="../product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../security.html">Security</a></li>
+            <li><a href="../pricing.html">Pricing</a></li>
+            <li><a href="index.html">Blog</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="../legal/terms.html">Terms</a></li>
+            <li><a href="../legal/privacy.html">Privacy</a></li>
+            <li><a href="../legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

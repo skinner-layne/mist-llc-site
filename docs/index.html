@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Mist Dynamics developer documentation. Quickstart, API reference, SDKs, routing concepts, and Prism verification.">
+  <title>Documentation — Mist Docs</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar">
+      <nav>
+        <div class="nav-group">
+          <h4>Get started</h4>
+          <ul>
+            <li><a href="index.html" class="active">Overview</a></li>
+            <li><a href="getting-started.html">Quickstart</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Concepts</h4>
+          <ul>
+            <li><a href="routing.html">How routing works</a></li>
+            <li><a href="verification.html">Prism verification</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Reference</h4>
+          <ul>
+            <li><a href="api-reference.html">API reference</a></li>
+            <li><a href="sdks.html">SDKs</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>More</h4>
+          <ul>
+            <li><a href="../index.html">Back to mist.llc</a></li>
+            <li><a href="../contact.html">Talk to sales</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="docs-main">
+      <header>
+        <div class="crumb">DOCUMENTATION</div>
+        <h1>Mist developer documentation</h1>
+        <p class="lede">Everything you need to integrate Mist into your application, from a five-minute quickstart to the full API reference.</p>
+      </header>
+
+      <section>
+        <p>Mist is an AI orchestration gateway for teams that want one production API instead of managing direct integrations with multiple model vendors. You send requests to a single OpenAI-compatible endpoint, and Mist routes them across 20+ providers including OpenAI, Anthropic, Google, and DeepSeek. The platform gives you one API key, one bill, one SLA, and provider failover when an upstream service is slow or unavailable.</p>
+        <p>For most integrations, existing code keeps working with a single <code>base_url</code> change. Mist preserves the OpenAI API shape on the client side, while adding controls that are difficult to build in-house: routing by task type, real-time spend caps, audit logs, and optional Prism verification for responses that need additional confidence. Start with the quickstart if you want to make a request now, or read the concepts pages first if you need to understand how routing and verification behave in production.</p>
+      </section>
+
+      <section>
+        <h2>Start here</h2>
+        <div class="quick-grid">
+          <a class="quick-card" href="getting-started.html">
+            <h3>Quickstart</h3>
+            <p>Make your first API call in five minutes with curl or your language SDK.</p>
+            <span class="arrow">Read &rarr;</span>
+          </a>
+          <a class="quick-card" href="routing.html">
+            <h3>How routing works</h3>
+            <p>Understand task types, fallback chains, and how Mist picks a model.</p>
+            <span class="arrow">Read &rarr;</span>
+          </a>
+          <a class="quick-card" href="verification.html">
+            <h3>Prism verification</h3>
+            <p>Cross-check critical responses across multiple providers.</p>
+            <span class="arrow">Read &rarr;</span>
+          </a>
+          <a class="quick-card" href="api-reference.html">
+            <h3>API reference</h3>
+            <p>Complete endpoint documentation with request and response schemas.</p>
+            <span class="arrow">Read &rarr;</span>
+          </a>
+          <a class="quick-card" href="sdks.html">
+            <h3>SDKs</h3>
+            <p>Official client libraries for Python, Node.js, and Go.</p>
+            <span class="arrow">Read &rarr;</span>
+          </a>
+          <a class="quick-card" href="../contact.html">
+            <h3>Talk to sales</h3>
+            <p>Have a question about pricing, security, or migration? Get in touch.</p>
+            <span class="arrow">Read &rarr;</span>
+          </a>
+        </div>
+      </section>
+
+      <section>
+        <h2>Common tasks</h2>
+        <ul>
+          <li><a href="getting-started.html">Replace OpenAI with Mist in 10 minutes</a></li>
+          <li><a href="routing.html">Configure a fallback chain</a></li>
+          <li><a href="verification.html">Run a Prism verification on a critical query</a></li>
+          <li><a href="api-reference.html">Authenticate with an API key</a></li>
+          <li><a href="sdks.html">Install the Python SDK</a></li>
+          <li><a href="routing.html">Set task-type hints for cost and latency control</a></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>What is Mist?</h2>
+        <p>Mist is an AI orchestration gateway, not a model. It sits between your application and the underlying model providers. On the front end, it speaks the OpenAI API, so existing OpenAI clients and most existing request payloads work without application-level rewrites.</p>
+        <p>On the back end, Mist routes each request to the cheapest capable model based on a task-type hint, falls back to alternates when a provider degrades, and records every request in an audit trail. For most engineering teams, the practical benefits are straightforward: lower model spend, typically in the 30&ndash;60% range; zero vendor lock-in because no provider-specific client is required; and built-in failover without maintaining custom routing logic yourself.</p>
+      </section>
+
+      <div class="callout">
+        <span class="callout-label">Tip</span>
+        <p>If you want to start coding immediately, go to the <a href="getting-started.html">Quickstart</a>. If you want to understand the architecture first, read <a href="routing.html">How routing works</a> and then <a href="verification.html">Prism verification</a>.</p>
+      </div>
+
+      <nav class="page-nav">
+      </nav>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

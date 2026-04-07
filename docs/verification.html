@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="How Mist's Prism verification feature cross-checks model output across multiple providers to surface disagreement and reduce single-model error.">
+  <title>Prism verification — Mist Docs</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="index.html">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar">
+      <nav>
+        <div class="nav-group">
+          <h4>Get started</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="getting-started.html">Quickstart</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Concepts</h4>
+          <ul>
+            <li><a href="routing.html">How routing works</a></li>
+            <li><a href="verification.html" class="active">Prism verification</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>Reference</h4>
+          <ul>
+            <li><a href="api-reference.html">API reference</a></li>
+            <li><a href="sdks.html">SDKs</a></li>
+          </ul>
+        </div>
+        <div class="nav-group">
+          <h4>More</h4>
+          <ul>
+            <li><a href="../index.html">Back to mist.llc</a></li>
+            <li><a href="../contact.html">Talk to sales</a></li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="docs-main">
+      <header>
+        <div class="crumb">CONCEPTS</div>
+        <h1>Prism verification</h1>
+        <p class="lede">Prism runs the same prompt through multiple uncorrelated models in parallel, compares the answers, and returns a verified result with disagreement surfaced. Use it when being wrong costs more than being slow.</p>
+      </header>
+
+      <section>
+        <h2>Why verification exists</h2>
+        <p>Any single LLM has a non-zero rate of confident wrong answers. In many production systems that is acceptable: the model is right often enough, the output is advisory rather than decisive, and the cost of an occasional bad answer is low. A routed single-model call is usually the correct tradeoff for speed, cost, and throughput. For use cases like autocomplete, internal search assistance, or low-risk classification, adding more checks often creates more overhead than value.</p>
+        <p>Some workloads have a different error budget. Financial decisions, medical triage, legal review, and any irreversible action can make a single incorrect answer materially expensive. For those requests, a single-model response is often not safe enough on its own. Prism is Mist's answer to that problem. Instead of calling one model, Prism runs the prompt through 3–8 uncorrelated models in parallel and compares the answers. If they agree, you get a high-confidence result. If they disagree, you get the disagreement surfaced for review. This is not free: it costs more, takes longer, and is only worth using where the cost of being wrong dominates.</p>
+      </section>
+
+      <section>
+        <h2>How it works</h2>
+        <ol>
+          <li>Mist receives the request with <code>verification: "prism"</code> set.</li>
+          <li>Mist selects 3–8 models from the routing table, ensuring no two share a base model lineage.</li>
+          <li>The same prompt is dispatched in parallel to each selected model.</li>
+          <li>Each response is collected and normalized.</li>
+          <li>A judge model compares the responses and identifies the consensus answer.</li>
+          <li>The judge also identifies any meaningful disagreements.</li>
+          <li>Mist returns a single response with the consensus answer plus a <code>prism_metadata</code> object containing all individual responses, the agreement score, and any disagreement notes.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>When to use Prism</h2>
+        <ul>
+          <li>The cost of a wrong answer exceeds the cost of additional latency and tokens.</li>
+          <li>You're making an irreversible decision based on the model output.</li>
+          <li>You're in a regulated context where you need an audit trail showing multiple models agreed.</li>
+          <li>You're spot-checking a new model before promoting it to production.</li>
+          <li>You're investigating a suspicious answer from a single-model call.</li>
+        </ul>
+        <p>Do not use Prism for high-volume, low-stakes requests. The latency and cost overhead make it impractical for workloads like autocomplete, chat triage, or bulk classification. For those, single-model routing is the right choice.</p>
+      </section>
+
+      <section>
+        <h2>Cost and latency</h2>
+        <p>A Prism call invokes 3–8 models plus a judge. In practice, cost is roughly 4–9× a single-model call. Latency is bounded by the slowest model in the panel, so end-to-end time is typically 2–4× a single-model call because the panel runs in parallel. Pricing is still token-based across all panel members, and you can inspect the final breakdown in <code>prism_metadata.cost_usd</code>.</p>
+        <div class="callout warn">
+          <p>Prism is intentionally expensive. Use it where the math justifies it. For everything else, use single-model routing and check the audit log if a specific request looks wrong.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Configuring Prism</h2>
+        <p>The simplest way to use Prism is to set <code>verification: "prism"</code> in the request body. Mist picks the panel for you using the built-in diversity rules.</p>
+        <pre><code>curl https://api.mist.llc/v1/chat/completions \
+  -H "Authorization: Bearer $MIST_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "auto",
+    "verification": "prism",
+    "messages": [
+      {
+        "role": "system",
+        "content": "Answer concisely and cite uncertainty."
+      },
+      {
+        "role": "user",
+        "content": "Based on the attached intake notes, should this claim be escalated for manual review?"
+      }
+    ]
+  }'</code></pre>
+        <p>If you want to control the panel yourself, pass <code>verification: "prism"</code> along with a <code>verification_panel</code> array of model names. Mist will dispatch only to those models. This is useful for benchmarking and for compliance scenarios where the panel composition is fixed by policy.</p>
+      </section>
+
+      <section>
+        <h2>Reading the result</h2>
+        <p>The top-level response still matches the OpenAI envelope, so existing code keeps working. In particular, <code>response.choices[0].message.content</code> still gives you the consensus answer. Mist adds a <code>prism_metadata</code> field with the verification details.</p>
+        <pre><code>{
+  "id": "chatcmpl_01JZ8R8YQ9ZV2K6J4K4M9N1P2Q",
+  "object": "chat.completion",
+  "created": 1775472000,
+  "model": "mist/prism",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Escalate for manual review. The claim includes conflicting dates and missing supporting documentation."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 812,
+    "completion_tokens": 74,
+    "total_tokens": 886
+  },
+  "prism_metadata": {
+    "panel": [
+      "openai/gpt-4.1",
+      "anthropic/claude-3-7-sonnet",
+      "google/gemini-2.5-pro",
+      "deepseek/deepseek-chat"
+    ],
+    "agreement_score": 0.92,
+    "consensus": "Escalate for manual review. The claim includes conflicting dates and missing supporting documentation.",
+    "disagreements": [
+      "One panel member classified the issue as incomplete rather than suspicious, but still recommended escalation."
+    ],
+    "individual_responses": [
+      {
+        "model": "openai/gpt-4.1",
+        "content": "Escalate for manual review due to conflicting dates and missing documents."
+      },
+      {
+        "model": "anthropic/claude-3-7-sonnet",
+        "content": "Manual review is recommended. The claim record has date inconsistencies and lacks documentation."
+      },
+      {
+        "model": "google/gemini-2.5-pro",
+        "content": "Escalate for review. The file is incomplete and contains conflicting timeline details."
+      },
+      {
+        "model": "deepseek/deepseek-chat",
+        "content": "Escalate for manual review based on conflicting dates and absent supporting evidence."
+      }
+    ],
+    "cost_usd": 0.1842,
+    "latency_ms": 6421
+  }
+}</code></pre>
+        <p>Use <code>agreement_score</code> as an operational signal rather than a guarantee. Scores below 0.7 should usually escalate to human review. Scores from 0.7 to 0.95 are best treated as verified with caveats, which means you should read the <code>disagreements</code> field. Scores above 0.95 are typically safe to treat as verified consensus.</p>
+      </section>
+
+      <section>
+        <h2>Other verification tiers</h2>
+        <p>Mist supports several verification tiers; Prism is the production default. Other tiers are documented in the API reference once they ship:</p>
+        <ul>
+          <li><code>none</code> — single-model routing, no verification (default)</li>
+          <li><code>single</code> — single-model with a re-read check by a judge</li>
+          <li><code>prism</code> — 3–8 model parallel panel (this page)</li>
+          <li><code>debate</code> — affirmative-and-negative debate with a judge (high latency, high quality)</li>
+          <li><code>parliament</code> — 8–50 model deliberation (used for the most critical decisions)</li>
+          <li><code>cascade</code> — adaptive multi-round verification (used when an early disagreement signals deeper investigation is needed)</li>
+        </ul>
+        <p>Each tier trades latency and cost for verification depth. Most teams start with <code>prism</code> for critical traffic and <code>none</code> for everything else.</p>
+      </section>
+
+      <section>
+        <h2>Next steps</h2>
+        <ul>
+          <li>Read the <a href="api-reference.html">API reference</a> for the exact request and response shapes.</li>
+          <li>Talk to <a href="../contact.html">sales</a> if you need a custom verification tier configured for your contract.</li>
+        </ul>
+      </section>
+
+      <nav class="page-nav">
+        <a href="routing.html" class="prev"><span class="direction">Previous</span>How routing works</a>
+        <a href="api-reference.html" class="next"><span class="direction">Next</span>API reference</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
