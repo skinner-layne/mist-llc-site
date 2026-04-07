@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cube-address" content="110.000.111">
-  <meta name="description" content="How Mist sends every verified prompt to three different model providers, compares outputs semantically, and flags disagreement before it reaches production.">
-  <title>How Cross-Model Verification Works (And Why You Should Care) — Mist Dynamics</title>
+  <meta name="description" content="Cross-model verification alone is not enough. Here is why Mist Dynamics pairs three-architecture diversity with structural hallucination detection — and why the combination catches a failure mode nothing else can see.">
+  <title>The Hallucination Nobody Else Catches — Mist Dynamics</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <link rel="stylesheet" href="../assets/style.css">
   <style>
@@ -52,6 +52,39 @@
       color: #0f172a;
       text-decoration: none;
     }
+    .post table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0 32px;
+      font-size: 15px;
+    }
+    .post table th,
+    .post table td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid #e5e5e5;
+      vertical-align: top;
+    }
+    .post table th {
+      background: #f5f5f5;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #525252;
+    }
+    .post table td:first-child {
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .post .quadrant-row-danger td:nth-child(3),
+    .post .quadrant-row-danger td {
+      background: #fef3c7;
+    }
+    .post .quadrant-row-danger td:first-child {
+      color: #92400e;
+      font-weight: 600;
+    }
     .post-cta {
       margin-top: 64px;
       padding: 32px;
@@ -92,52 +125,121 @@
   <article class="post">
     <a href="index.html" class="post-back">&larr; All posts</a>
     <span class="eyebrow">Verification</span>
-    <h1>How Cross-Model Verification Works (And Why You Should Care)</h1>
+    <h1>The Hallucination Nobody Else Catches</h1>
     <div class="post-meta">
       <span>April 7, 2026</span>
-      <span>6 min read</span>
+      <span>8 min read</span>
       <span>Mist Dynamics</span>
     </div>
 
     <div class="post-body">
-      <p>A lawyer filed a brief that cited cases that did not exist. The model had produced clean Bluebook-style citations, plausible quotations, and confident legal reasoning. It looked right until someone checked. In a demo, that kind of failure is embarrassing. In production, it is liability. The same pattern shows up outside law: a financial summary that moves a decimal point and turns millions into tens of millions, or a clinical workflow that suggests the wrong dosage. The problem is not that language models sometimes say strange things. The problem is that they say wrong things fluently enough to pass review.</p>
-      <h2>The single-model problem</h2>
-      <p>A lot of production LLM systems still rely on a simple pattern: send one prompt to one model, get one answer, and trust it unless a human notices something odd. That pattern is inherently fragile.</p>
-      <p>The reason is basic. These models are trained to predict plausible next tokens, not to maintain an internal notion of truth. They are optimized for fluency, coherence, and usefulness as judged by training data and post-training feedback. Sometimes that aligns with correctness. Sometimes it does not. A model can produce an answer that is articulate, internally consistent, and completely false.</p>
-      <p>This is the central operational fact technical leaders need to keep in view: fluency and correctness are orthogonal dimensions. One does not imply the other. In practice, fluent wrong answers are more dangerous than clumsy wrong answers because they are easier to trust.</p>
-      <p>A single model also has a deeper limitation. It has no reliable built-in mechanism for knowing when it is wrong. It can express uncertainty in words, but that uncertainty is itself generated text, not an external check. If the model fabricates a case citation, a policy reference, or a product spec, it usually does not have a second system standing behind it saying, no, that object does not exist.</p>
-      <p>Many teams try retries as a safety measure. That helps less than people hope. If you ask the same model the same question three times, you do not get three independent votes. You get three correlated samples from the same training lineage with the same blind spots. The wording may change, but the failure mode often does not. When a model has the wrong internal association, retries tend to produce variations of the same mistake.</p>
-      <h2>The cross-model intuition</h2>
-      <p>Cross-model verification starts from a simple observation. Different models make different mistakes.</p>
-      <p>If two or three models that were trained by different providers, on different datasets, with different post-training methods, independently arrive at the same answer, the probability that they are all hallucinating the same wrong answer is usually lower than the probability that any one of them is wrong alone. Errors tend to be idiosyncratic. Truth tends to be shared.</p>
-      <p>This is not a new idea in machine learning. Ensemble methods have been useful for years because combining multiple imperfect systems often produces a more reliable result than trusting one system in isolation. What changes with LLMs is the object being compared. We are not averaging numeric predictions. We are comparing claims, code behavior, extracted entities, and reasoning traces that are expressed in natural language.</p>
-      <p>The intuition is especially strong for factual prompts. If one model invents a legal citation, another may fail in a different way, or say it cannot verify. If all three independently produce the same case name, date, and holding, confidence should go up. Not to certainty, but materially up.</p>
-      <h2>How Mist implements it</h2>
-      <p>We call the technique cross-model verification. In plain terms, every verified prompt is sent to three different providers from three different training lineages. Depending on the workload, that might mean one model from OpenAI, one from Anthropic, and one from Google. In other cases, we mix by capability: a reasoning-oriented model, a code-oriented model, and a general-purpose model.</p>
-      <p>We then compare the outputs using a task-specific agreement layer. If the answers agree, we return the agreed result with a verified flag. If they disagree, we do not pretend they agreed. We surface the disagreement.</p>
-      <p>What happens next depends on the customer’s configuration and the risk level of the endpoint. In some cases, we return all three outputs with a warning so the application or operator can decide what to do. In others, we escalate to a fourth model as a tiebreaker. For the highest-stakes workflows, we send disagreements to a human reviewer.</p>
-      <p>That last part matters. Verification is not just an inference trick. It is a routing protocol. The goal is not only to improve answer quality when models converge, but also to detect uncertainty and handle it deliberately when they do not.</p>
-      <h2>What “agreement” means</h2>
-      <p>This is the hard part.</p>
-      <p>Agreement is not string matching. If one model says “The contract was signed on March 3, 2021” and another says “Execution occurred on 2021-03-03,” those outputs agree. If one says revenue was $12.4 million and another says $124 million, they do not, even if the surrounding paragraph is nearly identical. A naive implementation misses both cases.</p>
-      <p>So we treat agreement as a semantic comparison problem. For factual answers, we extract the claims that matter: dates, names, quantities, identifiers, references. Then we compare those claims directly. For code, we care less about exact syntax and more about behavior. Does the code compile? Does it pass the same tests? Does it produce the same outputs on representative inputs? For longer prose, we compare the key claims and conclusions, not the exact wording.</p>
-      <p>This comparison layer is where most naive implementations fail. It sounds easy until you build it. Models paraphrase. They compress or expand. They hedge in one sentence and assert in another. They may agree on the answer but disagree on the rationale, or vice versa. Production verification needs a claim extraction and normalization layer that is robust enough to catch substantive disagreement without treating harmless rephrasing as conflict.</p>
-      <p>In our experience, this comparison logic is the real engineering work. The idea of asking multiple models is simple. Determining whether they actually agree is not.</p>
-      <h2>What it costs and why that is the right tradeoff</h2>
-      <p>Cross-model verification costs more than a single call. Roughly speaking, you are paying for three model invocations instead of one, and sometimes a fourth if you use a tiebreaker. For many prompts, that is unnecessary. If the task is drafting low-risk marketing copy or summarizing an internal meeting, full verification may be wasteful.</p>
-      <p>But cost needs to be measured against consequence. For medical, legal, financial, or safety-critical outputs, the marginal token spend is small compared to the cost of one confident wrong answer making it into a customer workflow, a filing, or a business decision. A 3x inference bill is often trivial next to compliance exposure, support burden, rework, or reputational damage.</p>
-      <p>That is why we do not recommend verification everywhere. We recommend it where error has real cost. Customers choose per endpoint which prompts get verified and what should happen when models disagree.</p>
-      <h2>What it won’t catch</h2>
-      <p>Cross-model verification reduces hallucination risk. It does not eliminate it.</p>
-      <p>If all three models share the same bad assumption from their training data, they may agree and still be wrong. Shared bias is real. If a source fact changed recently and the models all have stale knowledge, agreement will not save you. If the prompt itself is ambiguous or underspecified, agreement may simply reflect a common interpretation, not correctness.</p>
-      <p>There is also a category of problems where the answer is not a fact to be recovered but a judgment to be made. In those cases, model agreement can be useful as a signal of consistency, but it is not proof that the judgment is right.</p>
-      <p>So we think of verification as a risk reduction mechanism, not a truth machine. It narrows one important failure mode: the single fluent model confidently inventing an answer without any independent check.</p>
-      <p>Verification is not magic. It is an engineering discipline applied to a substrate optimized for plausible language. For workloads where wrong answers have real consequences, that distinction matters. The difference between one model speaking confidently and several independent models converging on the same claim is the difference between a liability you hope nobody notices and a system you can actually deploy.</p>
+      <p>A lawyer filed a brief that cited cases that did not exist. The model produced clean Bluebook-style citations, plausible quotations, and confident legal reasoning. It looked right until someone checked. In a demo, that kind of failure is embarrassing. In production, it is liability. The same pattern shows up outside law: a financial summary that moves a decimal point and turns millions into tens of millions, a clinical workflow that suggests the wrong dosage, a research paper citing a DOI that does not resolve. The problem is not that language models sometimes say strange things. The problem is that they say wrong things fluently enough to pass review.</p>
+
+      <p>Most vendors in the AI infrastructure space respond to this problem with some version of "we use multiple models" or "we have a verification layer." When we started building Mist Dynamics, we thought the same. We thought that sending the same prompt to three architecturally different models and looking for disagreement would catch most hallucinations. It turns out that is wrong. This post is about why the naive cross-model story does not hold up, and what we actually built instead.</p>
+
+      <h2>What we found when we tested cross-model verification</h2>
+
+      <p>We ran the obvious experiment. We took a set of factual questions — both easy ones and hand-curated tail facts that we expected to trip up individual models — and we sent each question to three different architectures: OpenAI, Anthropic, and Google. We measured two things. First, how often the three models disagreed on the answer. Second, whether the disagreement cases correlated with wrong answers.</p>
+
+      <p>The result was humbling. Across every question we tested, the three models produced the same answer. Agreement rate: effectively one hundred percent. Disagreement rate: zero. The frontier models are saturated on factual recall — if a fact is in the training data of a major model, it is in the training data of all of them, and they retrieve it reliably. Our cross-model verifier had nothing to verify.</p>
+
+      <p>That is the honest result. Cross-model diversity, by itself, does not catch hallucinations on the class of questions most enterprise buyers will first try. If you only need a system that returns correct answers to factual questions, any single frontier model is already good enough, and paying three times as much to ask three of them is waste.</p>
+
+      <h2>But that is not the problem we are solving</h2>
+
+      <p>The questions that actually fail in production are not the questions where the model knows the answer. They are the questions where the model does not know, but produces a fluent confident answer anyway. The lawyer's hallucinated citation was not a retrieval failure — it was a fabrication. The model did not look up an existing case and get the citation wrong. It synthesized a case that never existed, with a plausible name, a plausible court, and a plausible year, because the prompt asked for one and the model was trained to produce plausible text. Cross-model diversity does not help here. If the prompt pushes all three models into the same fabrication mode, they will fabricate the same plausible lie, and they will all agree.</p>
+
+      <p>We call this class of failure <strong>shared hallucination</strong>. It is the single most dangerous thing a production AI system can do, because every traditional safety mechanism fails against it:</p>
+
+      <ul>
+        <li>Single-model confidence scores do not catch it, because the model is confident.</li>
+        <li>Self-consistency (sampling the same model multiple times) does not catch it, because all samples share the same prior.</li>
+        <li>Cross-model voting does not catch it, because the other models share overlapping training data and produce the same fabrication.</li>
+        <li>RAG does not catch it if the retrieval layer returns nothing and the model falls back on its priors.</li>
+        <li>"Are you sure?" prompting does not catch it, because the literature shows self-reflection is an unreliable signal at best.</li>
+      </ul>
+
+      <p>Shared hallucinations are not edge cases. They are the exact failure mode behind most of the AI incidents that have made the news — the Avianca case, the fake academic citations, the invented company policies, the fabricated historical events. Each of these incidents happened because a confident fluent wrong answer passed every automatic check and landed in front of a human who trusted it.</p>
+
+      <h2>The two layers we actually built</h2>
+
+      <p>Catching a shared hallucination requires two signals, not one. You need to detect the fabrication structurally — looking at the output itself for statistical signatures of confabulation — and you need to detect it across architectures, so you can distinguish "this single model is wrong" from "all models are wrong in the same direction." Mist Dynamics runs both layers on every verified query.</p>
+
+      <p><strong>Layer one is Prism.</strong> Every verified prompt is dispatched in parallel to three models from three distinct providers: OpenAI, Anthropic, and Google. Not three samples from one model — three architectures with different training lineage, different post-training methods, and different failure modes. We get back three responses, along with a full audit trail of which model said what, when, with what latency and cost. This layer, on its own, gives you the evidence production you need for compliance, the architectural failover you need for availability, and the consensus signal you need for confidence labeling. It does not, by itself, catch shared hallucinations. That is not its job.</p>
+
+      <p><strong>Layer two is QGE.</strong> QGE is our in-house hallucination detector. It does not require external documents. It does not require RAG. It does not ask the model whether it is sure. It analyzes the structure of the output itself — grammatical coherence, internal consistency, statistical signatures that distinguish retrieved content from fabricated content. On HalluBench, the standard hallucination detection benchmark, our most recent evaluation showed a 26.1 percentage point improvement in mean detection over the published state of the art. We are tracking to a 95 percent precision at 95 percent recall target on the next generation of the detector, tuned specifically for the high-stakes regime where false positives cost almost as much as false negatives.</p>
+
+      <p>On its own, QGE can flag suspicious output from a single model. But flagging a problem is only half the job. When QGE says "this looks like hallucination," you still need an answer to give the user. That is where the two layers combine.</p>
+
+      <h2>The decision matrix that catches what nothing else catches</h2>
+
+      <p>Every Mist verified query ends up in one of four buckets. The cell in the middle is the one that matters:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Prism agreement</th>
+            <th>QGE score</th>
+            <th>Interpretation</th>
+            <th>What Mist does</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>All three agree</td>
+            <td>Low</td>
+            <td>Legitimate consensus. Models know the answer and retrieved it reliably.</td>
+            <td>Return the answer with a high-confidence label.</td>
+          </tr>
+          <tr class="quadrant-row-danger">
+            <td>All three agree</td>
+            <td>High</td>
+            <td>Shared hallucination. The dangerous case.</td>
+            <td>Flag, return "I do not know" honestly, log the case for review.</td>
+          </tr>
+          <tr>
+            <td>Models disagree</td>
+            <td>One low, others high</td>
+            <td>Single model got it right, others hallucinated individually.</td>
+            <td>Return the low-score answer, log the disagreement.</td>
+          </tr>
+          <tr>
+            <td>Models disagree</td>
+            <td>All high</td>
+            <td>Question is outside training coverage.</td>
+            <td>Return "I do not know," recommend human review.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>The second row is the thing nothing else catches. Every single-model hallucination detector fails it because it only sees one output. Every voting-based ensemble fails it because voting rewards agreement. Every RAG system fails it if retrieval returns nothing. Mist catches it because QGE sees the structural signature of fabrication, and Prism confirms that all three independent architectures produced that fabricated content — which is a very strong signal that the models share a bad prior and cannot be trusted on this particular query.</p>
+
+      <p>When we detect a shared hallucination, we do not try to fix it. We return "I do not know." That is the defensible answer. A system that knows when it does not know is worth more than a system that is usually right.</p>
+
+      <h2>Who needs this and who does not</h2>
+
+      <p>You need Prism plus QGE if your product is in a regulated industry, if your customers include lawyers or doctors or auditors or researchers, if the cost of one confident wrong answer exceeds the cost of three model calls plus a hallucination detector, or if your procurement team has "multi-model verification" and "hallucination detection" as named controls in your vendor contract.</p>
+
+      <p>You do not need this if your use case is ideation, brainstorming, creative writing, internal search, or anywhere "close enough and fluent" is the target. Those workloads should run on single-model routing, which Mist also provides, at a much lower cost.</p>
+
+      <p>We do not recommend verification everywhere. We recommend it where error has real cost. Customers configure per endpoint which prompts get verified, what the cost ceiling is, and what happens when a hallucination is flagged.</p>
+
+      <h2>What we are not claiming</h2>
+
+      <p>We are not claiming zero hallucinations. No system can honestly claim that, and anyone who does is selling you something.</p>
+
+      <p>We are not claiming that Prism improves accuracy on simple factual questions. We tested this and the benchmarks showed zero delta against single-model output. Frontier models are already good at factual recall. Our value is not in the easy case.</p>
+
+      <p>We are not claiming that QGE catches every hallucination. It catches most, at a defensible precision-recall point, and we publish our benchmark numbers. Hallucinations that pass QGE and are structurally indistinguishable from retrieved content still happen, and a serious buyer should assume they exist.</p>
+
+      <p>We are claiming that the combination of Prism and QGE catches a class of failure — shared hallucinations — that no single-layer system can catch, and that this failure mode is behind most of the production AI incidents that actually hurt people and businesses. If that is the problem you have, Mist is the only infrastructure stack that addresses it directly. If it is not, you should use something cheaper.</p>
+
+      <p>Verification is not magic. It is an engineering discipline applied to a substrate optimized for plausible language. The difference between a single model speaking confidently and an architecture that knows when to say "I do not know" is the difference between a liability you hope nobody notices and a system you can actually deploy.</p>
     </div>
 
     <div class="post-cta">
-      <h3>Talk to a Mist sales engineer.</h3>
-      <p>We will scope your migration, walk through the architecture, and quote your annual run rate against your current AI spend.</p>
+      <h3>See Prism plus QGE on your actual workflow.</h3>
+      <p>We will scope a proof-of-concept against your current traffic, run your real prompts through the two-layer pipeline, and show you the shared-hallucination catches on the first day.</p>
       <a href="../contact.html" class="btn btn-primary">Talk to Sales</a>
     </div>
   </article>

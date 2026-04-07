@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cube-address" content="110.000.111">
-  <meta name="description" content="How Mist's Prism verification feature cross-checks model output across multiple providers to surface disagreement and reduce single-model error.">
-  <title>Prism verification — Mist Docs</title>
+  <meta name="description" content="How Mist Dynamics combines Prism (cross-architecture diversity) with QGE (structural hallucination detection) to catch shared hallucinations no single-layer system can see.">
+  <title>Verification — Prism + QGE — Mist Docs</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -40,7 +40,7 @@
           <h4>Concepts</h4>
           <ul>
             <li><a href="routing.html">How routing works</a></li>
-            <li><a href="verification.html" class="active">Prism verification</a></li>
+            <li><a href="verification.html" class="active">Verification (Prism + QGE)</a></li>
           </ul>
         </div>
         <div class="nav-group">
@@ -63,52 +63,105 @@
     <main class="docs-main">
       <header>
         <div class="crumb">CONCEPTS</div>
-        <h1>Prism verification</h1>
-        <p class="lede">Prism runs the same prompt through multiple uncorrelated models in parallel, compares the answers, and returns a verified result with disagreement surfaced. Use it when being wrong costs more than being slow.</p>
+        <h1>Verification: Prism + QGE</h1>
+        <p class="lede">Mist Dynamics verification is a two-layer system. Prism runs the same prompt through three architecturally distinct models in parallel. QGE scores each output for structural hallucination signatures. The combination catches a failure mode — shared hallucinations — that no single-layer system can detect.</p>
       </header>
 
       <section>
-        <h2>Why verification exists</h2>
-        <p>Any single LLM has a non-zero rate of confident wrong answers. In many production systems that is acceptable: the model is right often enough, the output is advisory rather than decisive, and the cost of an occasional bad answer is low. A routed single-model call is usually the correct tradeoff for speed, cost, and throughput. For use cases like autocomplete, internal search assistance, or low-risk classification, adding more checks often creates more overhead than value.</p>
-        <p>Some workloads have a different error budget. Financial decisions, medical triage, legal review, and any irreversible action can make a single incorrect answer materially expensive. For those requests, a single-model response is often not safe enough on its own. Prism is Mist's answer to that problem. Instead of calling one model, Prism runs the prompt through 3–8 uncorrelated models in parallel and compares the answers. If they agree, you get a high-confidence result. If they disagree, you get the disagreement surfaced for review. This is not free: it costs more, takes longer, and is only worth using where the cost of being wrong dominates.</p>
+        <h2>Why two layers</h2>
+        <p>Most AI platforms that talk about "verification" mean one of two things: cross-model voting (ask several models and take the majority) or hallucination detection (run a classifier on the output). Each of these, on its own, has a blind spot that the other does not.</p>
+        <p>Cross-model voting fails on <strong>shared hallucinations</strong>. When all three models share overlapping training data and the prompt pushes them into fabrication mode, they produce the same plausible-sounding wrong answer and the voter sees consensus. This is not a theoretical concern. Our own benchmarks on factual tail questions showed that frontier models (GPT-5.4, Claude Sonnet 4.6, Gemini 3.1 Pro) agree on the answer essentially one hundred percent of the time on knowable facts — which means the voting signal contains zero information about correctness in that regime.</p>
+        <p>Single-model hallucination detection fails on the <strong>alternative problem</strong>. Even if you can detect that one model is fabricating, you still need an answer to give the user. Flagging the hallucination is half the job; replacing it with something trustworthy is the other half.</p>
+        <p>Mist runs both layers on the same query. Prism supplies architectural diversity and failover. QGE supplies structural hallucination detection. The combined decision logic handles the case where neither layer alone would catch the failure.</p>
       </section>
 
       <section>
-        <h2>How it works</h2>
-        <ol>
-          <li>Mist receives the request with <code>verification: "prism"</code> set.</li>
-          <li>Mist selects 3–8 models from the routing table, ensuring no two share a base model lineage.</li>
-          <li>The same prompt is dispatched in parallel to each selected model.</li>
-          <li>Each response is collected and normalized.</li>
-          <li>A judge model compares the responses and identifies the consensus answer.</li>
-          <li>The judge also identifies any meaningful disagreements.</li>
-          <li>Mist returns a single response with the consensus answer plus a <code>prism_metadata</code> object containing all individual responses, the agreement score, and any disagreement notes.</li>
-        </ol>
-      </section>
-
-      <section>
-        <h2>When to use Prism</h2>
+        <h2>Layer 1 — Prism (cross-architecture dispatch)</h2>
+        <p>Prism dispatches the verified prompt in parallel to three (or more) models from distinct providers. The default panel uses one model from each of the three major frontier providers:</p>
         <ul>
-          <li>The cost of a wrong answer exceeds the cost of additional latency and tokens.</li>
-          <li>You're making an irreversible decision based on the model output.</li>
-          <li>You're in a regulated context where you need an audit trail showing multiple models agreed.</li>
-          <li>You're spot-checking a new model before promoting it to production.</li>
-          <li>You're investigating a suspicious answer from a single-model call.</li>
+          <li>OpenAI (GPT family)</li>
+          <li>Anthropic (Claude family)</li>
+          <li>Google (Gemini family)</li>
         </ul>
-        <p>Do not use Prism for high-volume, low-stakes requests. The latency and cost overhead make it impractical for workloads like autocomplete, chat triage, or bulk classification. For those, single-model routing is the right choice.</p>
+        <p>You can override the panel via the <code>verification_panel</code> field to enforce your own diversity rules — for example, to include open-weight models for domains where their training lineage is meaningfully different, or to pin a specific architecture set required by compliance policy.</p>
+        <p>Prism produces four outputs that matter:</p>
+        <ol>
+          <li>The three individual model responses, normalized.</li>
+          <li>The audit trail (which model, when, at what cost and latency).</li>
+          <li>An agreement score computed semantically, not by string matching. "Signed March 3, 2021" and "Execution on 2021-03-03" agree. "$12.4 million" and "$124 million" do not. Code outputs are compared by behavior (compiles, passes tests, matches reference I/O).</li>
+          <li>A structured disagreement trace when models diverge, identifying which claims conflict.</li>
+        </ol>
+        <p>Prism by itself is valuable for three reasons that do not depend on catching hallucinations: it produces a compliance-grade audit trail, it provides architectural failover (if one provider rate-limits or goes down, the other two are already in-flight), and it generates a confidence label that procurement teams can point at in SOC 2 evidence. Use it alone where those benefits justify the cost and you do not need hallucination detection.</p>
+      </section>
+
+      <section>
+        <h2>Layer 2 — QGE (structural hallucination detection)</h2>
+        <p>QGE (Quantum Grammar Engine) is Mist's in-house hallucination detector. It runs independently on each of the responses produced by Prism and assigns a hallucination risk score from 0.0 (structurally consistent with retrieved content) to 1.0 (structurally consistent with fabrication).</p>
+        <p>QGE does not require external documents, does not use RAG, and does not prompt the model to self-assess. The detector analyzes the output itself: grammatical coherence, internal consistency between claims, statistical signatures that distinguish retrieval from synthesis, and domain-specific markers tuned for the target task.</p>
+        <p>On HalluBench, the standard hallucination detection benchmark, our most recent evaluation showed a <strong>+26.1 percentage point improvement in mean detection</strong> over the published state of the art. The next generation of the detector targets 95% precision at 95% recall, tuned for high-stakes regimes where false positives cost almost as much as false negatives.</p>
+        <p>You can use QGE on single-model traffic without Prism by setting <code>verification: "qge"</code>. The QGE score is returned in <code>qge_metadata.hallucination_score</code>. For most verified workloads, however, Prism plus QGE together is the recommended configuration.</p>
+      </section>
+
+      <section>
+        <h2>Combined decision logic</h2>
+        <p>When you set <code>verification: "prism"</code>, Mist runs both layers and routes the result through a four-cell decision matrix:</p>
+        <table class="decision-matrix">
+          <thead>
+            <tr>
+              <th>Prism agreement</th>
+              <th>QGE score</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>All agree</td>
+              <td>All low</td>
+              <td>Return consensus with <code>confidence: "high"</code></td>
+            </tr>
+            <tr>
+              <td>All agree</td>
+              <td>All high</td>
+              <td>Shared hallucination detected. Return <code>"I do not know"</code> with <code>confidence: "rejected"</code>. Log for review.</td>
+            </tr>
+            <tr>
+              <td>Disagree</td>
+              <td>One low, others high</td>
+              <td>Return the low-score answer with <code>confidence: "medium"</code>, attach disagreement trace.</td>
+            </tr>
+            <tr>
+              <td>Disagree</td>
+              <td>All high</td>
+              <td>Question outside training coverage. Return <code>"I do not know"</code> with <code>confidence: "rejected"</code>, recommend human review.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>The second row is the reason this combination exists. Single-model detectors miss it because they only see one output. Voting ensembles miss it because voting rewards agreement. RAG misses it if retrieval returns nothing. Prism plus QGE catches it because QGE sees the structural signature of fabrication and Prism confirms all three independent architectures produced that fabricated content — a strong signal that the models share a bad prior and cannot be trusted on this query.</p>
+      </section>
+
+      <section>
+        <h2>When to use verification</h2>
+        <ul>
+          <li>The cost of a wrong answer exceeds the cost of three model calls plus the QGE layer.</li>
+          <li>You are making an irreversible decision based on model output.</li>
+          <li>You are in a regulated context where an audit trail showing multiple models and an independent hallucination score is a named control.</li>
+          <li>You are spot-checking a new model before promoting it to production.</li>
+          <li>You are investigating a suspicious answer from a single-model call.</li>
+        </ul>
+        <p>Do <strong>not</strong> use verification for high-volume, low-stakes requests. The latency and cost overhead make it impractical for workloads like autocomplete, chat triage, or bulk classification. For those, single-model routing is the correct choice. Customers configure verification per endpoint — critical traffic uses <code>prism</code>, everything else uses <code>none</code>.</p>
       </section>
 
       <section>
         <h2>Cost and latency</h2>
-        <p>A Prism call invokes 3–8 models plus a judge. In practice, cost is roughly 4–9× a single-model call. Latency is bounded by the slowest model in the panel, so end-to-end time is typically 2–4× a single-model call because the panel runs in parallel. Pricing is still token-based across all panel members, and you can inspect the final breakdown in <code>prism_metadata.cost_usd</code>.</p>
+        <p>A Prism plus QGE call invokes three models in parallel plus the QGE scoring pass (which runs on each output and is fast — milliseconds, not seconds). Cost is typically 3x to 4x a single-model call, not 9x, because QGE is an in-house classifier with no per-token upstream cost. Latency is bounded by the slowest model in the panel since the three model calls run in parallel; QGE scoring adds a small fixed overhead. End-to-end time is typically 2x to 3x a single-model call.</p>
         <div class="callout warn">
-          <p>Prism is intentionally expensive. Use it where the math justifies it. For everything else, use single-model routing and check the audit log if a specific request looks wrong.</p>
+          <p>Verification is intentionally more expensive than single-model routing. Use it where the math justifies it. For everything else, use <code>verification: "none"</code> and inspect the audit log if a specific request looks wrong after the fact.</p>
         </div>
       </section>
 
       <section>
-        <h2>Configuring Prism</h2>
-        <p>The simplest way to use Prism is to set <code>verification: "prism"</code> in the request body. Mist picks the panel for you using the built-in diversity rules.</p>
+        <h2>Configuring verification</h2>
+        <p>The simplest configuration uses the default panel and the default QGE threshold:</p>
         <pre><code>curl https://api.mist.llc/v1/chat/completions \
   -H "Authorization: Bearer $MIST_API_KEY" \
   -H "Content-Type: application/json" \
@@ -118,7 +171,7 @@
     "messages": [
       {
         "role": "system",
-        "content": "Answer concisely and cite uncertainty."
+        "content": "Answer concisely. Cite uncertainty explicitly."
       },
       {
         "role": "user",
@@ -126,17 +179,28 @@
       }
     ]
   }'</code></pre>
-        <p>If you want to control the panel yourself, pass <code>verification: "prism"</code> along with a <code>verification_panel</code> array of model names. Mist will dispatch only to those models. This is useful for benchmarking and for compliance scenarios where the panel composition is fixed by policy.</p>
+        <p>To control the panel composition yourself, pass <code>verification_panel</code>. This is useful when compliance policy fixes the panel or when you are benchmarking. To tune the QGE hallucination threshold, pass <code>qge_threshold</code> (default 0.7; raise for stricter rejection, lower for more permissive answers):</p>
+        <pre><code>{
+  "model": "auto",
+  "verification": "prism",
+  "verification_panel": [
+    "openai/gpt-5.4",
+    "anthropic/claude-sonnet-4.6",
+    "google/gemini-3.1-pro"
+  ],
+  "qge_threshold": 0.6,
+  "messages": [...]
+}</code></pre>
       </section>
 
       <section>
         <h2>Reading the result</h2>
-        <p>The top-level response still matches the OpenAI envelope, so existing code keeps working. In particular, <code>response.choices[0].message.content</code> still gives you the consensus answer. Mist adds a <code>prism_metadata</code> field with the verification details.</p>
+        <p>The top-level response matches the OpenAI envelope, so existing clients keep working. <code>response.choices[0].message.content</code> gives you the decision-matrix output: consensus if high confidence, the low-QGE answer on single-model disagreement, or <code>"I do not know"</code> when a shared hallucination or full disagreement is detected. The <code>verification_metadata</code> field contains both Prism and QGE details.</p>
         <pre><code>{
   "id": "chatcmpl_01JZ8R8YQ9ZV2K6J4K4M9N1P2Q",
   "object": "chat.completion",
   "created": 1775472000,
-  "model": "mist/prism",
+  "model": "mist/verified",
   "choices": [
     {
       "index": 0,
@@ -152,62 +216,89 @@
     "completion_tokens": 74,
     "total_tokens": 886
   },
-  "prism_metadata": {
-    "panel": [
-      "openai/gpt-4.1",
-      "anthropic/claude-3-7-sonnet",
-      "google/gemini-2.5-pro",
-      "deepseek/deepseek-chat"
-    ],
-    "agreement_score": 0.92,
-    "consensus": "Escalate for manual review. The claim includes conflicting dates and missing supporting documentation.",
-    "disagreements": [
-      "One panel member classified the issue as incomplete rather than suspicious, but still recommended escalation."
-    ],
+  "verification_metadata": {
+    "decision": "consensus_verified",
+    "confidence": "high",
+    "prism": {
+      "panel": [
+        "openai/gpt-5.4",
+        "anthropic/claude-sonnet-4.6",
+        "google/gemini-3.1-pro"
+      ],
+      "agreement_score": 0.92,
+      "disagreements": []
+    },
+    "qge": {
+      "hallucination_scores": {
+        "openai/gpt-5.4": 0.08,
+        "anthropic/claude-sonnet-4.6": 0.11,
+        "google/gemini-3.1-pro": 0.09
+      },
+      "max_score": 0.11,
+      "threshold": 0.7,
+      "flagged": false
+    },
     "individual_responses": [
       {
-        "model": "openai/gpt-4.1",
-        "content": "Escalate for manual review due to conflicting dates and missing documents."
+        "model": "openai/gpt-5.4",
+        "content": "Escalate for manual review due to conflicting dates and missing documents.",
+        "hallucination_score": 0.08
       },
       {
-        "model": "anthropic/claude-3-7-sonnet",
-        "content": "Manual review is recommended. The claim record has date inconsistencies and lacks documentation."
+        "model": "anthropic/claude-sonnet-4.6",
+        "content": "Manual review is recommended. The claim record has date inconsistencies and lacks documentation.",
+        "hallucination_score": 0.11
       },
       {
-        "model": "google/gemini-2.5-pro",
-        "content": "Escalate for review. The file is incomplete and contains conflicting timeline details."
-      },
-      {
-        "model": "deepseek/deepseek-chat",
-        "content": "Escalate for manual review based on conflicting dates and absent supporting evidence."
+        "model": "google/gemini-3.1-pro",
+        "content": "Escalate for review. The file is incomplete and contains conflicting timeline details.",
+        "hallucination_score": 0.09
       }
     ],
     "cost_usd": 0.1842,
     "latency_ms": 6421
   }
 }</code></pre>
-        <p>Use <code>agreement_score</code> as an operational signal rather than a guarantee. Scores below 0.7 should usually escalate to human review. Scores from 0.7 to 0.95 are best treated as verified with caveats, which means you should read the <code>disagreements</code> field. Scores above 0.95 are typically safe to treat as verified consensus.</p>
+        <p>Inspect <code>verification_metadata.decision</code> as the primary operational signal. Possible values:</p>
+        <ul>
+          <li><code>consensus_verified</code> — all models agreed, all QGE scores below threshold. High confidence.</li>
+          <li><code>single_model_selected</code> — models disagreed but one produced a low-QGE answer. Medium confidence.</li>
+          <li><code>shared_hallucination_rejected</code> — all models agreed but all QGE scores above threshold. The answer field is <code>"I do not know"</code>. Do not display model content.</li>
+          <li><code>uncertainty_rejected</code> — full disagreement with all QGE scores high. The answer field is <code>"I do not know"</code>. Recommend human review.</li>
+        </ul>
       </section>
 
       <section>
         <h2>Other verification tiers</h2>
-        <p>Mist supports several verification tiers; Prism is the production default. Other tiers are documented in the API reference once they ship:</p>
+        <p>Prism plus QGE is the production default. Other tiers exist for different cost/latency/depth trade-offs:</p>
         <ul>
           <li><code>none</code> — single-model routing, no verification (default)</li>
-          <li><code>single</code> — single-model with a re-read check by a judge</li>
-          <li><code>prism</code> — 3–8 model parallel panel (this page)</li>
-          <li><code>debate</code> — affirmative-and-negative debate with a judge (high latency, high quality)</li>
-          <li><code>parliament</code> — 8–50 model deliberation (used for the most critical decisions)</li>
-          <li><code>cascade</code> — adaptive multi-round verification (used when an early disagreement signals deeper investigation is needed)</li>
+          <li><code>qge</code> — single-model with QGE hallucination scoring only (no architectural diversity)</li>
+          <li><code>prism</code> — three-model parallel panel plus QGE (this page)</li>
+          <li><code>debate</code> — affirmative-and-negative debate with a judge model (higher latency, higher depth)</li>
+          <li><code>parliament</code> — 8 to 50 model deliberation (used for the most critical decisions)</li>
+          <li><code>cascade</code> — adaptive multi-round verification (escalates depth only when earlier rounds flag uncertainty)</li>
         </ul>
-        <p>Each tier trades latency and cost for verification depth. Most teams start with <code>prism</code> for critical traffic and <code>none</code> for everything else.</p>
+        <p>Most teams start with <code>prism</code> for critical traffic and <code>none</code> for everything else. Upgrade to <code>debate</code> or <code>parliament</code> only for irreversible decisions where the cost of rework vastly exceeds the cost of extended verification.</p>
+      </section>
+
+      <section>
+        <h2>What verification does not claim</h2>
+        <p>We publish these limits explicitly so you know exactly what you are buying:</p>
+        <ul>
+          <li>Prism alone does not improve accuracy on simple factual questions. Our benchmarks show frontier models are saturated on factual recall; the single-model baseline is already at the ceiling. The value of Prism is audit trail, failover, compliance labeling, and the diversity signal that feeds the combined decision matrix with QGE.</li>
+          <li>QGE is a statistical detector with a publishable precision-recall curve. It misses some hallucinations. Serious buyers should assume false negatives exist and design their human-review layer accordingly.</li>
+          <li>Verification does not catch hallucinations produced by a training-data error that is structurally identical to retrieved content. Nothing can, without external ground truth. If that is a concern, pair verification with RAG from an authoritative corpus and cross-check against the retrieved documents.</li>
+          <li>Verification does not make judgment calls correct. For prompts where "right" is a matter of opinion or policy rather than fact, agreement across models is a signal of consistency, not of correctness. Use human review for judgment-bound decisions.</li>
+        </ul>
       </section>
 
       <section>
         <h2>Next steps</h2>
         <ul>
-          <li>Read the <a href="api-reference.html">API reference</a> for the exact request and response shapes.</li>
-          <li>Talk to <a href="../contact.html">sales</a> if you need a custom verification tier configured for your contract.</li>
+          <li>Read the <a href="api-reference.html">API reference</a> for exact request and response shapes.</li>
+          <li>Review <a href="routing.html">how routing works</a> to understand how Mist selects models within each Prism panel.</li>
+          <li>Contact <a href="../contact.html">sales</a> to scope a proof-of-concept on your actual workflow.</li>
         </ul>
       </section>
 
