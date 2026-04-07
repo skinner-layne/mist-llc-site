@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Mist Dynamics routes every prompt to the right model across 20+ providers. One key. One bill. One SLA. Enterprise AI infrastructure built for procurement.">
+  <title>Mist Dynamics — One key. Every model. One bill.</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <!-- ===== NAV ===== -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">
+        Mist<span class="brand-sub">Dynamics</span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="product.html">Product</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+        <li><a href="security.html">Security</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container">
+      <span class="eyebrow">AI Infrastructure for Enterprise</span>
+      <h1>One key. Every model. One bill.</h1>
+      <p class="lead">Mist routes every prompt to the right model across 20+ providers. Pay one invoice. Get one SLA. Never get locked in.</p>
+      <div class="hero-ctas">
+        <a href="contact.html" class="btn btn-primary btn-lg">Talk to Sales</a>
+        <a href="https://docs.mist.llc" class="btn btn-ghost btn-lg">Read the docs</a>
+      </div>
+
+      <div class="trust-strip">
+        <div class="trust-label">Trusted by teams at</div>
+        <div class="logo-row">
+          <span class="logo-placeholder">ACME LABS</span>
+          <span class="logo-placeholder">NORTHFIELD</span>
+          <span class="logo-placeholder">MERIDIAN AI</span>
+          <span class="logo-placeholder">CONSTANT&Co.</span>
+          <span class="logo-placeholder">HARBOR/TWELVE</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROBLEM ===== -->
+  <section class="section-bordered">
+    <div class="container">
+      <span class="eyebrow">The Problem</span>
+      <h2 class="section-title">Your team uses six AI providers. You manage six bills, six SLAs, six compliance reviews.</h2>
+      <p class="section-lead">The market told you that adopting AI was easy. Then your engineering org integrated OpenAI for reasoning, Anthropic for long context, Google for multimodal, and three more for cost arbitrage. Now your procurement team is drowning.</p>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3>Vendor lock-in</h3>
+          <p>Switching from one provider to another means rewriting integrations and re-auditing every workflow. The migration cost gets buried in engineering cycles your CFO never sees.</p>
+        </div>
+        <div class="card">
+          <h3>Cost opacity</h3>
+          <p>Token pricing changes monthly. Your finance team has no way to forecast next quarter's AI spend, and your engineering team has no incentive to choose the cheapest capable model.</p>
+        </div>
+        <div class="card">
+          <h3>Reliability gaps</h3>
+          <p>When a provider degrades, your application degrades with it. There is no failover. There is no second source. Your customers feel it before your monitoring does.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SOLUTION ===== -->
+  <section class="section-tinted">
+    <div class="container">
+      <span class="eyebrow">The Solution</span>
+      <h2 class="section-title">Mist is the routing fabric between your application and every model.</h2>
+      <p class="section-lead">A single OpenAI-compatible endpoint. Every major provider behind it. Every prompt routed to the cheapest capable model in real time. Every dollar logged, every decision audited, every provider replaceable.</p>
+
+      <div class="arch" aria-label="Architecture diagram: your app to Mist API to model providers">
+        <div class="arch-node">Your app</div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node primary">Mist API</div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-providers">
+          <div class="arch-provider">OpenAI</div>
+          <div class="arch-provider">Anthropic</div>
+          <div class="arch-provider">Google</div>
+          <div class="arch-provider">DeepSeek</div>
+          <div class="arch-provider">Mistral</div>
+          <div class="arch-provider">Cohere</div>
+          <div class="arch-provider">Groq</div>
+          <div class="arch-provider">+13 more</div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:48px;">
+        <div class="feature">
+          <div class="check">&#10003;</div>
+          <h3>Cost optimization</h3>
+          <p>Routes each prompt to the cheapest capable model. Customers see 30&ndash;60% reduction in monthly AI spend without changing a line of application code.</p>
+        </div>
+        <div class="feature">
+          <div class="check">&#10003;</div>
+          <h3>Vendor independence</h3>
+          <p>Swap providers without code changes. Your application code targets Mist, not OpenAI. When the next model lands, you get it the day it ships.</p>
+        </div>
+        <div class="feature">
+          <div class="check">&#10003;</div>
+          <h3>Built-in failover</h3>
+          <p>When a provider degrades, Mist routes around it. Your customers never see the outage. Your on-call engineer reads about it in the post-mortem.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CAPABILITIES ===== -->
+  <section>
+    <div class="container">
+      <span class="eyebrow">Capabilities</span>
+      <h2 class="section-title">Everything an enterprise needs from an AI vendor.</h2>
+      <p class="section-lead">Built for the procurement office, the security team, and the engineering org &mdash; all at once.</p>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3>Universal API</h3>
+          <p>One endpoint, OpenAI-compatible. Drop-in for existing code. No SDK required. Use the OpenAI client library you already have.</p>
+        </div>
+        <div class="card">
+          <h3>47 task types</h3>
+          <p>Routing optimized for reasoning, code, creative, summarization, vision, OCR, and 41 more. Each task type has a tuned fallback chain.</p>
+        </div>
+        <div class="card">
+          <h3>Real-time spend caps</h3>
+          <p>Hard budget limits per project, team, or API key. Soft limits trigger alerts. Hard limits stop traffic. Your CFO sleeps.</p>
+        </div>
+        <div class="card">
+          <h3>Audit trail</h3>
+          <p>Every prompt, every routing decision, every cost &mdash; logged and exportable. SIEM integrations included. Retention configurable.</p>
+        </div>
+        <div class="card">
+          <h3>Verification</h3>
+          <p>Optional cross-model fact-checking via the Prism protocol. Run the same prompt through three providers. Surface disagreement.</p>
+        </div>
+        <div class="card">
+          <h3>Enterprise SSO</h3>
+          <p>SAML, OIDC, SCIM provisioning included on every plan. Role-based access control. Per-team API keys. Just-in-time deprovisioning.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STATS ===== -->
+  <section style="padding-top:0;padding-bottom:80px;">
+    <div class="container">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num">20+</div>
+          <div class="stat-label">Model providers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">47</div>
+          <div class="stat-label">Task-type routes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">99.95%</div>
+          <div class="stat-label">Target uptime SLA</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">30&ndash;60%</div>
+          <div class="stat-label">Typical cost reduction</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <div class="container">
+    <div class="cta-section">
+      <h2>Stop managing six AI vendors.</h2>
+      <p>Talk to a Mist sales engineer. We&rsquo;ll show you the architecture, scope your migration, and quote your annual run-rate against your current bills.</p>
+      <a href="contact.html" class="btn btn-primary btn-lg">Talk to Sales</a>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product.html">Routing</a></li>
+            <li><a href="product.html#verification">Verification</a></li>
+            <li><a href="product.html#audit">Audit</a></li>
+            <li><a href="product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="security.html">Security</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="legal/terms.html">Terms</a></li>
+            <li><a href="legal/privacy.html">Privacy</a></li>
+            <li><a href="legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Talk to Mist Dynamics sales. Tell us about your stack and your AI usage. We'll route you to the right person within one business day.">
+  <title>Contact — Mist Dynamics</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="product.html">Product</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+        <li><a href="security.html">Security</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" style="padding-bottom:32px;">
+    <div class="container">
+      <span class="eyebrow">Contact</span>
+      <h1>Talk to sales.</h1>
+    </div>
+  </section>
+
+  <!-- ===== FORM SECTION ===== -->
+  <section style="padding-top:32px;">
+    <div class="container">
+      <div class="two-col">
+
+        <div>
+          <h2 style="font-size:28px;margin-bottom:16px;">How to engage</h2>
+          <p>Tell us about your stack and your AI usage. We&rsquo;ll route you to the right person within one business day.</p>
+          <p>If you&rsquo;re comparing options, bring your last month&rsquo;s AI invoices (redacted is fine). We&rsquo;ll quote a Mist contract against your current run-rate and show you the migration path.</p>
+          <p>If you&rsquo;re evaluating for a regulated industry, our security and compliance lead will join the first call.</p>
+
+          <h3 style="margin-top:40px;font-size:18px;">Other channels</h3>
+          <ul style="list-style:none;margin-top:12px;">
+            <li style="padding:10px 0;border-top:1px solid #e5e5e5;"><strong>sales@mist.llc</strong><div class="muted" style="font-size:14px;">General sales</div></li>
+            <li style="padding:10px 0;border-top:1px solid #e5e5e5;"><strong>security@mist.llc</strong><div class="muted" style="font-size:14px;">Security &amp; compliance questions</div></li>
+            <li style="padding:10px 0;border-top:1px solid #e5e5e5;border-bottom:1px solid #e5e5e5;"><strong>support@mist.llc</strong><div class="muted" style="font-size:14px;">Existing customer support</div></li>
+          </ul>
+        </div>
+
+        <div>
+          <form class="form" id="contactForm" onsubmit="event.preventDefault(); document.getElementById('contactForm').style.display='none'; document.getElementById('thankYou').style.display='block';">
+            <div class="field">
+              <label for="name">Full name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="field">
+              <label for="email">Work email</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="field">
+              <label for="company">Company</label>
+              <input type="text" id="company" name="company" required>
+            </div>
+            <div class="field">
+              <label for="volume">Estimated monthly token volume</label>
+              <select id="volume" name="volume" required>
+                <option value="">Select an estimate</option>
+                <option value="lt10m">Less than 10M tokens</option>
+                <option value="10-50m">10M&ndash;50M tokens</option>
+                <option value="50-250m">50M&ndash;250M tokens</option>
+                <option value="250m-1b">250M&ndash;1B tokens</option>
+                <option value="gt1b">More than 1B tokens</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Current providers</label>
+              <div class="checkbox-row">
+                <label><input type="checkbox" name="provider" value="openai"> OpenAI</label>
+                <label><input type="checkbox" name="provider" value="anthropic"> Anthropic</label>
+                <label><input type="checkbox" name="provider" value="google"> Google</label>
+                <label><input type="checkbox" name="provider" value="other"> Other</label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="usecase">Tell us about your use case</label>
+              <textarea id="usecase" name="usecase" placeholder="What are you building? Where is the pain?"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Send</button>
+          </form>
+
+          <div id="thankYou" class="thank-you" style="display:none;">
+            <h3 style="margin-bottom:8px;color:#15803d;">Thanks &mdash; we&rsquo;ll be in touch.</h3>
+            <p style="color:#15803d;margin-bottom:0;">A Mist sales engineer will reach out within one business day.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" style="margin-top:80px;">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product.html">Routing</a></li>
+            <li><a href="product.html#verification">Verification</a></li>
+            <li><a href="product.html#audit">Audit</a></li>
+            <li><a href="product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="security.html">Security</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="legal/terms.html">Terms</a></li>
+            <li><a href="legal/privacy.html">Privacy</a></li>
+            <li><a href="legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

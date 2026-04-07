@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Mist Dynamics security and compliance: data handling, SOC 2 roadmap, GDPR DPA, HIPAA BAA, identity and access controls, infrastructure, incident response.">
+  <title>Security — Mist Dynamics</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="product.html">Product</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+        <li><a href="security.html">Security</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container">
+      <span class="eyebrow">Security &amp; Compliance</span>
+      <h1>Security and compliance.</h1>
+      <p class="lead">Mist Dynamics is the named legal entity on every contract. Your DPA, MSA, and audit reports name Mist Dynamics LLC, not a brand. Procurement teams get a single counterparty.</p>
+    </div>
+  </section>
+
+  <!-- ===== DATA HANDLING ===== -->
+  <section class="section-bordered" id="data-handling">
+    <div class="container">
+      <span class="eyebrow">Data handling</span>
+      <h2 class="section-title">Where your data lives, who touches it, how long we keep it.</h2>
+
+      <div class="two-col" style="margin-top:32px;">
+        <div>
+          <h3>Encryption</h3>
+          <p>All traffic to Mist is TLS 1.3. Data at rest is AES-256 encrypted. Secrets &mdash; including provider API keys &mdash; are stored in an HSM-backed vault and never written to disk in plaintext.</p>
+
+          <h3 style="margin-top:24px;">Training opt-out</h3>
+          <p>Prompts and responses routed through Mist are <strong>not used for model training</strong> by Mist Dynamics. Where Mist routes to a third-party provider, we use that provider&rsquo;s zero-retention enterprise endpoint when one is available, and we contractually prohibit training on customer data on every relationship where that&rsquo;s an option.</p>
+        </div>
+        <div>
+          <h3>Retention</h3>
+          <p>Prompts and responses are <strong>not retained beyond billing reconciliation</strong> &mdash; typically 7 days. Hashes, token counts, latencies, and routing decisions are retained per your configured audit log retention (90 days on Team, 1 year on Business, configurable on Enterprise).</p>
+
+          <h3 style="margin-top:24px;">Data residency</h3>
+          <p>Enterprise customers can pin all routing to US, EU, or APAC regions. Mist will exclude any provider that cannot serve a request from the required region. Audit logs are stored in the same region as the traffic.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMPLIANCE ROADMAP ===== -->
+  <section class="section-tinted" id="compliance">
+    <div class="container container-narrow">
+      <span class="eyebrow">Compliance roadmap</span>
+      <h2 class="section-title">Where we are. Where we&rsquo;re going.</h2>
+      <p class="section-lead">We publish our compliance status honestly. Items in progress are in progress. Items planned have a target. We don&rsquo;t claim certifications we don&rsquo;t hold.</p>
+
+      <ul class="compliance-list">
+        <li>
+          <div>
+            <strong>SOC 2 Type I</strong>
+            <div class="muted" style="font-size:14px;">Auditor engaged. Controls implemented. Report expected Q3 2026.</div>
+          </div>
+          <span class="badge badge-progress">In Progress</span>
+        </li>
+        <li>
+          <div>
+            <strong>SOC 2 Type II</strong>
+            <div class="muted" style="font-size:14px;">Observation window begins after Type I report. Target Q2 2027.</div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </li>
+        <li>
+          <div>
+            <strong>GDPR DPA</strong>
+            <div class="muted" style="font-size:14px;">Standard Contractual Clauses included. EU representative engaged.</div>
+          </div>
+          <span class="badge badge-available">Available on request</span>
+        </li>
+        <li>
+          <div>
+            <strong>HIPAA BAA</strong>
+            <div class="muted" style="font-size:14px;">Available on Enterprise plan. Restricted to HIPAA-compliant provider routes.</div>
+          </div>
+          <span class="badge badge-available">Available (Enterprise)</span>
+        </li>
+        <li>
+          <div>
+            <strong>ISO 27001</strong>
+            <div class="muted" style="font-size:14px;">Gap analysis complete. Certification target 2027.</div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </li>
+        <li>
+          <div>
+            <strong>PCI DSS</strong>
+            <div class="muted" style="font-size:14px;">Mist does not process payment card data. Out of scope.</div>
+          </div>
+          <span class="badge badge-planned">N/A</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== IDENTITY & ACCESS ===== -->
+  <section id="identity">
+    <div class="container">
+      <span class="eyebrow">Identity &amp; Access</span>
+      <h2 class="section-title">Single sign-on, role-based access, just-in-time deprovisioning.</h2>
+
+      <div class="grid-3" style="margin-top:32px;">
+        <div class="card">
+          <h3>SSO</h3>
+          <p>SAML 2.0 and OIDC supported on every plan, not gated to Enterprise. Tested with Okta, Azure AD, Google Workspace, OneLogin, JumpCloud.</p>
+        </div>
+        <div class="card">
+          <h3>SCIM</h3>
+          <p>SCIM 2.0 user provisioning. When you offboard an employee in your IdP, their Mist access ends within minutes.</p>
+        </div>
+        <div class="card">
+          <h3>RBAC</h3>
+          <p>Five built-in roles: Admin, Billing, Engineer, Auditor, Viewer. Custom roles on Enterprise.</p>
+        </div>
+        <div class="card">
+          <h3>API key scoping</h3>
+          <p>Scope each API key to a project, a model set, a spend cap, and a list of allowed source IPs.</p>
+        </div>
+        <div class="card">
+          <h3>Audit logs</h3>
+          <p>Every admin action, every key creation, every config change &mdash; logged with actor, time, and prior-state diff.</p>
+        </div>
+        <div class="card">
+          <h3>MFA</h3>
+          <p>WebAuthn (passkeys) and TOTP supported. MFA enforcement configurable per role.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROVIDER RELATIONSHIPS ===== -->
+  <section class="section-tinted">
+    <div class="container">
+      <span class="eyebrow">Provider relationships</span>
+      <h2 class="section-title">Direct enterprise contracts. Not redistributed retail.</h2>
+      <p class="section-lead">Mist Dynamics holds direct enterprise accounts with each provider in our routing fabric. Your traffic flows through commercially-papered relationships, not through someone else&rsquo;s consumer API key.</p>
+
+      <p>This matters for three reasons:</p>
+      <ul style="list-style:none;margin:24px 0;">
+        <li style="padding:12px 0;border-top:1px solid #e5e5e5;"><strong>Liability.</strong> If something goes wrong upstream, Mist Dynamics is the counterparty in the chain &mdash; not a Reddit post about a hobbyist proxy.</li>
+        <li style="padding:12px 0;border-top:1px solid #e5e5e5;"><strong>Rate limits.</strong> Enterprise accounts get enterprise rate limits. Your traffic isn&rsquo;t fighting hobbyist quotas during a launch.</li>
+        <li style="padding:12px 0;border-top:1px solid #e5e5e5;"><strong>Data terms.</strong> Enterprise endpoints typically include zero-retention and no-training defaults. Retail endpoints often don&rsquo;t.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== INFRASTRUCTURE ===== -->
+  <section>
+    <div class="container">
+      <span class="eyebrow">Infrastructure</span>
+      <h2 class="section-title">Multi-region. Automated failover. HSM-backed secrets.</h2>
+
+      <div class="grid-2" style="margin-top:32px;">
+        <div class="card">
+          <h3>Multi-region deployment</h3>
+          <p>Mist runs in three independent regions (US-East, US-West, EU-Central) with active-active load balancing. Regional failover is automatic.</p>
+        </div>
+        <div class="card">
+          <h3>Secrets management</h3>
+          <p>Provider API keys live in an HSM-backed secrets vault with hardware-rooted attestation. Key rotation is automated and logged.</p>
+        </div>
+        <div class="card">
+          <h3>Network isolation</h3>
+          <p>Routing infrastructure runs in a VPC with no public ingress except the API gateway. Internal traffic is mTLS-authenticated.</p>
+        </div>
+        <div class="card">
+          <h3>Vulnerability management</h3>
+          <p>Continuous dependency scanning, weekly patch cadence, quarterly third-party penetration tests. Critical vulnerabilities patched within 24 hours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INCIDENT RESPONSE ===== -->
+  <section class="section-tinted">
+    <div class="container container-narrow">
+      <span class="eyebrow">Incident response</span>
+      <h2 class="section-title">When something goes wrong, we tell you.</h2>
+      <p class="section-lead">We publish a status page, run a 24/7 on-call rotation, and commit to root-cause analysis on every incident that affects customer traffic.</p>
+
+      <ul style="list-style:none;">
+        <li style="padding:16px 0;border-top:1px solid #e5e5e5;"><strong>Status page.</strong> <a href="https://status.mist.llc">status.mist.llc</a> &mdash; updated within 5 minutes of incident detection.</li>
+        <li style="padding:16px 0;border-top:1px solid #e5e5e5;"><strong>On-call rotation.</strong> 24/7 engineering on-call with a 15-minute response SLA on production incidents.</li>
+        <li style="padding:16px 0;border-top:1px solid #e5e5e5;"><strong>Customer notification.</strong> Email and webhook alerts for any incident affecting your traffic. Enterprise customers also get a phone tree.</li>
+        <li style="padding:16px 0;border-top:1px solid #e5e5e5;"><strong>Post-incident RCA.</strong> Every customer-affecting incident gets a written root-cause analysis published within five business days. No exceptions.</li>
+        <li style="padding:16px 0;border-top:1px solid #e5e5e5;border-bottom:1px solid #e5e5e5;"><strong>Breach notification.</strong> Notification within 72 hours of confirmed breach, per GDPR Article 33 standards, regardless of whether GDPR applies to your jurisdiction.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== TRUST STATEMENT / CONTACT ===== -->
+  <section>
+    <div class="container">
+      <div style="background:#fafafa;border:1px solid #e5e5e5;border-radius:16px;padding:48px;">
+        <h2 style="font-size:28px;margin-bottom:16px;">Mist Dynamics LLC is the named legal entity on every contract.</h2>
+        <p style="color:#525252;font-size:17px;">Your DPA, MSA, audit reports, and breach notifications all name Mist Dynamics LLC, a Delaware limited liability company. Procurement teams get a single counterparty &mdash; no shell companies, no trademark licensors, no &ldquo;parent of a parent of a brand.&rdquo;</p>
+        <p style="color:#525252;font-size:17px;margin-top:16px;">Send security questions to <a href="mailto:security@mist.llc">security@mist.llc</a>. We respond within one business day.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <div class="container">
+    <div class="cta-section">
+      <h2>Need our security questionnaire response?</h2>
+      <p>We maintain pre-filled CAIQ, SIG, and SIG-Lite questionnaires. We can usually return your custom questionnaire within five business days.</p>
+      <a href="contact.html" class="btn btn-primary btn-lg">Request Security Package</a>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product.html">Routing</a></li>
+            <li><a href="product.html#verification">Verification</a></li>
+            <li><a href="product.html#audit">Audit</a></li>
+            <li><a href="product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="security.html">Security</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="legal/terms.html">Terms</a></li>
+            <li><a href="legal/privacy.html">Privacy</a></li>
+            <li><a href="legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

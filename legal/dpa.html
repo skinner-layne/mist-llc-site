@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Mist Dynamics LLC Data Processing Addendum. Mist acts as data processor on behalf of customer-controllers, with sub-processor list and security commitments.">
+  <title>Data Processing Addendum — Mist Dynamics</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="../product.html">Product</a></li>
+        <li><a href="../pricing.html">Pricing</a></li>
+        <li><a href="../security.html">Security</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+        <li><a href="../contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <article class="legal-doc">
+    <h1>Data Processing Addendum</h1>
+    <div class="doc-date">Effective April 7, 2026</div>
+
+    <p>This Data Processing Addendum (&ldquo;DPA&rdquo;) forms part of the agreement between Mist Dynamics LLC (&ldquo;Mist,&rdquo; &ldquo;Processor&rdquo;) and the Customer (&ldquo;Controller&rdquo;) for the provision of the Mist Services (the &ldquo;Agreement&rdquo;). Where Mist processes personal data on behalf of Customer in connection with the Services, this DPA applies and governs that processing.</p>
+
+    <h2>1. Definitions</h2>
+    <p>Capitalized terms not defined here have the meanings set forth in the Agreement or in the GDPR. &ldquo;Personal Data,&rdquo; &ldquo;Data Subject,&rdquo; &ldquo;Processing,&rdquo; &ldquo;Controller,&rdquo; &ldquo;Processor,&rdquo; and &ldquo;Subprocessor&rdquo; have the meanings given to them in Article 4 of the GDPR.</p>
+
+    <h2>2. Roles of the Parties</h2>
+    <p>Customer is the Controller of Personal Data submitted to the Services. Mist is the Processor of such Personal Data. Where applicable, Customer&rsquo;s end users may themselves be Controllers and Customer is their Processor; in that case, Mist acts as a Subprocessor on behalf of Customer.</p>
+
+    <h2>3. Scope and Purpose of Processing</h2>
+    <p>Mist will Process Personal Data only to:</p>
+    <ul>
+      <li>Provide the Services as described in the Agreement.</li>
+      <li>Forward requests to the Provider selected by the routing logic configured by Customer.</li>
+      <li>Comply with Customer&rsquo;s documented written instructions.</li>
+      <li>Comply with applicable law.</li>
+    </ul>
+    <p>Mist will not Process Personal Data for any other purpose without Customer&rsquo;s prior written consent.</p>
+
+    <h2>4. Confidentiality</h2>
+    <p>Mist ensures that personnel authorized to Process Personal Data are bound by confidentiality obligations.</p>
+
+    <h2>5. Security Measures</h2>
+    <p>Mist implements appropriate technical and organizational measures to ensure a level of security appropriate to the risk, including:</p>
+    <ul>
+      <li>Encryption of Personal Data in transit (TLS 1.3) and at rest (AES-256).</li>
+      <li>HSM-backed secrets management for credentials and provider API keys.</li>
+      <li>Role-based access control with MFA enforcement on administrative roles.</li>
+      <li>Audit logging of administrative actions.</li>
+      <li>Regular vulnerability scanning and quarterly third-party penetration testing.</li>
+      <li>Documented incident response procedures.</li>
+      <li>Multi-region backup and disaster recovery.</li>
+    </ul>
+
+    <h2>6. Subprocessors</h2>
+    <p>Customer authorizes Mist to engage Subprocessors to provide the Services. Mist will impose data protection obligations on each Subprocessor that are no less protective than those set out in this DPA. The current list of Subprocessors is below. Mist will provide at least 30 days&rsquo; prior written notice (or notice via the Mist dashboard) of any addition or replacement of Subprocessors.</p>
+
+    <h3 style="margin-top:24px;">Current Subprocessors</h3>
+
+    <div class="table-wrap" style="margin-top:16px;">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Subprocessor</th>
+            <th>Purpose</th>
+            <th>Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>OpenAI</td><td>Model inference (when routed)</td><td>United States</td></tr>
+          <tr><td>Anthropic</td><td>Model inference (when routed)</td><td>United States</td></tr>
+          <tr><td>Google Cloud / Vertex</td><td>Model inference (when routed)</td><td>United States, EU</td></tr>
+          <tr><td>DeepSeek</td><td>Model inference (when routed)</td><td>Outside EU</td></tr>
+          <tr><td>Mistral AI</td><td>Model inference (when routed)</td><td>European Union</td></tr>
+          <tr><td>Cohere</td><td>Model inference (when routed)</td><td>United States, Canada</td></tr>
+          <tr><td>xAI</td><td>Model inference (when routed)</td><td>United States</td></tr>
+          <tr><td>Together AI</td><td>Model inference (when routed)</td><td>United States</td></tr>
+          <tr><td>Fireworks AI</td><td>Model inference (when routed)</td><td>United States</td></tr>
+          <tr><td>Groq</td><td>Model inference (when routed)</td><td>United States</td></tr>
+          <tr><td>Cerebras</td><td>Model inference (when routed)</td><td>United States</td></tr>
+          <tr><td>Perplexity</td><td>Model inference (when routed)</td><td>United States</td></tr>
+          <tr><td>Cloud infrastructure (TBD)</td><td>Hosting and compute</td><td>United States, EU</td></tr>
+          <tr><td>Stripe</td><td>Payment processing</td><td>United States</td></tr>
+          <tr><td>Email transactional provider (TBD)</td><td>Account &amp; alerting email</td><td>United States</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:16px;font-size:14px;color:#525252;">Customer may restrict routing to a subset of the above Subprocessors via project-level configuration in the Mist dashboard. Restricting Subprocessors may reduce the routing fabric&rsquo;s ability to optimize cost and reliability.</p>
+
+    <h2>7. Data Subject Requests</h2>
+    <p>Mist will, taking into account the nature of the Processing, assist Customer by appropriate technical and organizational measures, insofar as possible, to fulfill Customer&rsquo;s obligation to respond to requests for exercising Data Subject rights.</p>
+
+    <h2>8. Personal Data Breach Notification</h2>
+    <p>Mist will notify Customer without undue delay, and in any case within 72 hours, after becoming aware of a Personal Data Breach affecting Customer&rsquo;s Personal Data. The notification will describe the nature of the breach, the categories and approximate number of Data Subjects and records concerned, the likely consequences, and the measures taken or proposed to address the breach.</p>
+
+    <h2>9. Data Protection Impact Assessments</h2>
+    <p>Mist will provide reasonable assistance to Customer with any data protection impact assessments and prior consultations with supervisory authorities that Customer is required to carry out under the GDPR.</p>
+
+    <h2>10. Deletion or Return of Personal Data</h2>
+    <p>Upon termination of the Agreement, Mist will, at Customer&rsquo;s choice, delete or return all Personal Data to Customer, and delete existing copies, unless applicable law requires storage of the Personal Data.</p>
+
+    <h2>11. Audits</h2>
+    <p>Mist will make available to Customer all information necessary to demonstrate compliance with this DPA, and will allow for and contribute to audits, including inspections, conducted by Customer or another auditor mandated by Customer, subject to reasonable advance notice and confidentiality obligations. Audit rights are deemed satisfied by Mist&rsquo;s SOC 2 reports once available.</p>
+
+    <h2>12. International Transfers</h2>
+    <p>Where Personal Data is transferred from the EEA, UK, or Switzerland to a country not deemed to provide an adequate level of protection, the parties incorporate by reference the Standard Contractual Clauses adopted by the European Commission, with Mist as the &ldquo;data importer.&rdquo;</p>
+
+    <h2>13. Term</h2>
+    <p>This DPA is effective for as long as Mist Processes Personal Data on behalf of Customer.</p>
+
+    <h2>14. Contact</h2>
+    <p>Questions or to invoke any right under this DPA:<br>
+    <a href="mailto:privacy@mist.llc">privacy@mist.llc</a><br>
+    Mist Dynamics LLC, Delaware, United States.</p>
+
+    <p style="margin-top:48px;padding:16px;background:#fef3c7;border-left:4px solid #d97706;border-radius:4px;font-size:14px;color:#78350f;"><strong>Notice.</strong> This document is a placeholder pending review by qualified privacy counsel. Final DPA will replace this document prior to general availability. Enterprise customers requiring an executed DPA today should contact <a href="mailto:legal@mist.llc">legal@mist.llc</a>.</p>
+  </article>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="../product.html">Routing</a></li>
+            <li><a href="../product.html#verification">Verification</a></li>
+            <li><a href="../product.html#audit">Audit</a></li>
+            <li><a href="../product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../security.html">Security</a></li>
+            <li><a href="../pricing.html">Pricing</a></li>
+            <li><a href="../contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="terms.html">Terms</a></li>
+            <li><a href="privacy.html">Privacy</a></li>
+            <li><a href="dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="How Mist works: routing logic, supported providers, code examples, and how it compares to direct integration, LangChain, and OpenRouter.">
+  <title>Product — Mist Dynamics</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="product.html">Product</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+        <li><a href="security.html">Security</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container">
+      <span class="eyebrow">Product</span>
+      <h1>What Mist does.</h1>
+      <p class="lead">Mist sits between your application and every model provider. It accepts an OpenAI-compatible request, picks the right model based on task type and cost, and returns a response. If a provider fails, it transparently retries on another. Every decision is logged.</p>
+    </div>
+  </section>
+
+  <!-- ===== ARCHITECTURE DEEP DIVE ===== -->
+  <section class="section-bordered">
+    <div class="container">
+      <span class="eyebrow">Architecture</span>
+      <h2 class="section-title">How a request flows through Mist</h2>
+      <p class="section-lead">Five steps, 60 milliseconds of routing overhead, no SDK changes on your side.</p>
+
+      <ol class="steps">
+        <li>
+          <h4>Your application sends a request</h4>
+          <p>Your code uses the OpenAI client library, pointed at <code>api.mist.llc/v1/chat/completions</code>. The request body is identical to what you&rsquo;d send to OpenAI directly.</p>
+        </li>
+        <li>
+          <h4>Mist classifies the task</h4>
+          <p>The router inspects the prompt, system message, and any explicit task hint header. It assigns one of 47 task types: reasoning, code generation, summarization, vision, OCR, classification, etc.</p>
+        </li>
+        <li>
+          <h4>Mist picks a model</h4>
+          <p>For the assigned task type, Mist looks up the active routing chain &mdash; ordered by cost-quality ratio, filtered by your project&rsquo;s allowed providers and any data-residency constraints. The top-ranked model wins.</p>
+        </li>
+        <li>
+          <h4>Mist calls the provider</h4>
+          <p>Mist forwards the request to the chosen provider over a commercially-papered enterprise account. If the provider returns 5xx, hits a rate limit, or exceeds latency budget, Mist retries on the next model in the chain.</p>
+        </li>
+        <li>
+          <h4>Mist returns the response and logs everything</h4>
+          <p>Your application receives an OpenAI-format response. In parallel, Mist logs the prompt hash, the routing decision, the provider, the latency, the token counts, and the cost &mdash; available in your dashboard and exportable to your SIEM.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===== ROUTING LOGIC ===== -->
+  <section class="section-tinted">
+    <div class="container">
+      <span class="eyebrow">Routing logic</span>
+      <h2 class="section-title">Task types, cost optimization, fallback chains</h2>
+
+      <div class="two-col" style="margin-top:32px;">
+        <div>
+          <h3>Task-type classification</h3>
+          <p>Mist supports 47 task types. Each represents a distinct shape of AI work, from high-stakes reasoning down to bulk classification. Common ones: <code>reasoning</code>, <code>code</code>, <code>creative</code>, <code>synthesis</code>, <code>summarization</code>, <code>quick</code>, <code>vision</code>, <code>ocr</code>, <code>web_search</code>, <code>math_science</code>.</p>
+          <p>You can let Mist classify automatically (default) or pin a task type explicitly via the <code>X-Mist-Task</code> header.</p>
+        </div>
+        <div>
+          <h3>Cost optimization</h3>
+          <p>Within each task type, models are ordered by a cost-quality score derived from continuous benchmarking. Mist picks the cheapest model that meets your minimum quality threshold for that task.</p>
+          <p>You can override this per-project: pin to a specific provider, set a maximum cost-per-million-tokens, or require a specific compliance tier.</p>
+        </div>
+        <div>
+          <h3>Fallback chains</h3>
+          <p>Every task type has an ordered fallback chain. If the primary fails (5xx, rate limit, latency budget exceeded), Mist tries the next model in the chain. Customers see one successful response; the failover is invisible.</p>
+        </div>
+        <div>
+          <h3>Routing overrides</h3>
+          <p>Quality regressions get caught fast. Our Assayer system continuously samples production traffic, scores responses, and updates routing weights nightly. When a model degrades, traffic shifts away within hours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROVIDERS ===== -->
+  <section>
+    <div class="container">
+      <span class="eyebrow">Providers</span>
+      <h2 class="section-title">20+ providers behind one endpoint</h2>
+      <p class="section-lead">Mist holds direct enterprise contracts with each provider listed below. Your traffic flows through commercially-papered relationships, not redistributed retail accounts.</p>
+
+      <div class="provider-grid">
+        <div class="provider-tile">OpenAI <small>GPT, o-series</small></div>
+        <div class="provider-tile">Anthropic <small>Claude</small></div>
+        <div class="provider-tile">Google <small>Gemini</small></div>
+        <div class="provider-tile">DeepSeek <small>R1, V3</small></div>
+        <div class="provider-tile">Mistral <small>Large, Codestral</small></div>
+        <div class="provider-tile">Cohere <small>Command R+</small></div>
+        <div class="provider-tile">xAI <small>Grok</small></div>
+        <div class="provider-tile">Together AI <small>Llama, Qwen</small></div>
+        <div class="provider-tile">Fireworks <small>Llama, Mixtral</small></div>
+        <div class="provider-tile">Groq <small>Llama, GPT-OSS</small></div>
+        <div class="provider-tile">Cerebras <small>Qwen, Llama</small></div>
+        <div class="provider-tile">Perplexity <small>Sonar</small></div>
+        <div class="provider-tile">Replicate <small>Llama, Flux</small></div>
+        <div class="provider-tile">Nvidia <small>Nemotron</small></div>
+        <div class="provider-tile">Alibaba <small>Qwen 3</small></div>
+        <div class="provider-tile">Z.ai <small>GLM-4.6</small></div>
+        <div class="provider-tile">AI21 <small>Jamba</small></div>
+        <div class="provider-tile">SambaNova <small>Llama 3</small></div>
+        <div class="provider-tile">Lepton AI <small>Mixtral</small></div>
+        <div class="provider-tile">Anyscale <small>Llama</small></div>
+        <div class="provider-tile">Databricks <small>DBRX</small></div>
+        <div class="provider-tile">Custom <small>BYO endpoint</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CODE EXAMPLES ===== -->
+  <section class="section-tinted">
+    <div class="container">
+      <span class="eyebrow">Drop-in API</span>
+      <h2 class="section-title">OpenAI-compatible. Three lines of change.</h2>
+      <p class="section-lead">If your code calls OpenAI today, the migration is a base URL and an API key. No SDK swap. No request shape changes. No response shape changes.</p>
+
+      <h3 style="margin-top:32px;">Python</h3>
+      <pre class="code-block"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI
+
+client = OpenAI(
+    api_key=<span class="string">"sk-mist-..."</span>,
+    base_url=<span class="string">"https://api.mist.llc/v1"</span>,
+)
+
+response = client.chat.completions.create(
+    model=<span class="string">"auto"</span>,  <span class="comment"># let Mist pick</span>
+    messages=[
+        {<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Explain merge sort in 3 sentences."</span>}
+    ],
+)
+
+<span class="keyword">print</span>(response.choices[<span class="string">0</span>].message.content)
+</pre>
+
+      <h3>Node.js</h3>
+      <pre class="code-block"><span class="keyword">import</span> OpenAI <span class="keyword">from</span> <span class="string">"openai"</span>;
+
+<span class="keyword">const</span> client = <span class="keyword">new</span> OpenAI({
+  apiKey: process.env.MIST_API_KEY,
+  baseURL: <span class="string">"https://api.mist.llc/v1"</span>,
+});
+
+<span class="keyword">const</span> response = <span class="keyword">await</span> client.chat.completions.create({
+  model: <span class="string">"auto"</span>,
+  messages: [{ role: <span class="string">"user"</span>, content: <span class="string">"Summarize the Treaty of Westphalia."</span> }],
+});
+
+console.log(response.choices[<span class="string">0</span>].message.content);
+</pre>
+
+      <h3>curl</h3>
+      <pre class="code-block">curl https://api.mist.llc/v1/chat/completions \
+  -H <span class="string">"Authorization: Bearer $MIST_API_KEY"</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -H <span class="string">"X-Mist-Task: reasoning"</span> \
+  -d <span class="string">'{
+    "model": "auto",
+    "messages": [{"role": "user", "content": "What is the time complexity of quicksort?"}]
+  }'</span>
+</pre>
+    </div>
+  </section>
+
+  <!-- ===== COMPARISON ===== -->
+  <section>
+    <div class="container">
+      <span class="eyebrow">How Mist compares</span>
+      <h2 class="section-title">Honest comparison</h2>
+      <p class="section-lead">Mist is not the only way to call multiple AI models. It is the only way built for the enterprise procurement office. Here is where each option fits.</p>
+
+      <div class="table-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Mist</th>
+              <th>Direct integration</th>
+              <th>LangChain</th>
+              <th>OpenRouter</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Single invoice</strong></td>
+              <td class="yes">Yes</td>
+              <td class="no">No (six bills)</td>
+              <td class="no">No (still six bills)</td>
+              <td class="yes">Yes</td>
+            </tr>
+            <tr>
+              <td><strong>Enterprise MSA / DPA</strong></td>
+              <td class="yes">Yes (one)</td>
+              <td class="partial">Per provider</td>
+              <td class="no">N/A (library)</td>
+              <td class="partial">Limited</td>
+            </tr>
+            <tr>
+              <td><strong>Audit trail / SIEM export</strong></td>
+              <td class="yes">Built in</td>
+              <td class="no">DIY</td>
+              <td class="partial">DIY plugin</td>
+              <td class="partial">Basic logs</td>
+            </tr>
+            <tr>
+              <td><strong>Real-time spend caps</strong></td>
+              <td class="yes">Hard limits</td>
+              <td class="no">No</td>
+              <td class="no">No</td>
+              <td class="partial">Soft limits</td>
+            </tr>
+            <tr>
+              <td><strong>Automatic failover</strong></td>
+              <td class="yes">Per task type</td>
+              <td class="no">DIY</td>
+              <td class="partial">DIY chain</td>
+              <td class="partial">Basic</td>
+            </tr>
+            <tr>
+              <td><strong>Open source</strong></td>
+              <td class="no">No (proprietary)</td>
+              <td>N/A</td>
+              <td class="yes">Yes</td>
+              <td class="no">No</td>
+            </tr>
+            <tr>
+              <td><strong>Provider breadth</strong></td>
+              <td>20+ enterprise</td>
+              <td>You pick</td>
+              <td>100+ via wrappers</td>
+              <td class="yes">200+</td>
+            </tr>
+            <tr>
+              <td><strong>SOC 2 / DPA available</strong></td>
+              <td class="yes">Yes</td>
+              <td class="partial">Per provider</td>
+              <td class="no">N/A</td>
+              <td class="partial">Limited</td>
+            </tr>
+            <tr>
+              <td><strong>Best for</strong></td>
+              <td>Procurement-led orgs</td>
+              <td>Single-provider shops</td>
+              <td>Open-source devs</td>
+              <td>Indie / hobby</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:24px;color:#525252;font-size:15px;"><strong>The honest take.</strong> If you have one engineer and one provider, direct integration is fine. If you want flexibility and you write your own infrastructure, LangChain is great. If you&rsquo;re a hobbyist who wants breadth, OpenRouter is excellent. If you have a procurement office, a finance team, an audit obligation, and an SLA you have to honor &mdash; Mist is built for you.</p>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <div class="container">
+    <div class="cta-section">
+      <h2>See it on your stack.</h2>
+      <p>Bring your current AI bills and your top three use cases. We&rsquo;ll show you the migration path, the routing chain, and the projected savings on a real call.</p>
+      <a href="contact.html" class="btn btn-primary btn-lg">Talk to Sales</a>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product.html">Routing</a></li>
+            <li><a href="product.html#verification">Verification</a></li>
+            <li><a href="product.html#audit">Audit</a></li>
+            <li><a href="product.html#sso">SSO</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="security.html">Security</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="legal/terms.html">Terms</a></li>
+            <li><a href="legal/privacy.html">Privacy</a></li>
+            <li><a href="legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
