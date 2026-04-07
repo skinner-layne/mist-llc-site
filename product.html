@@ -96,6 +96,76 @@
     </div>
   </section>
 
+  <!-- ===== VERIFICATION (Prism + QGE) ===== -->
+  <section id="verification" class="section-bordered">
+    <div class="container">
+      <span class="eyebrow">Verification</span>
+      <h2 class="section-title">Prism + QGE — the hallucination nobody else catches</h2>
+      <p class="section-lead">For workloads where a confidently wrong answer costs more than three model calls, Mist runs a two-layer verification system on every request. Most platforms ship one layer. We ship both because each is defeatable on its own.</p>
+
+      <div class="two-col" style="margin-top:32px;">
+        <div>
+          <h3>Layer 1 — Prism</h3>
+          <p>Every verified prompt is dispatched in parallel to three models from three distinct providers (OpenAI, Anthropic, Google by default). Not three samples from one model — three <strong>architectures</strong> with different training data and different failure modes. You get the audit trail, architectural failover, and a semantic agreement score out of the box.</p>
+          <p style="color:#525252;font-size:14px;margin-top:12px;"><strong>What Prism does not do alone:</strong> catch hallucinations on factual questions. Our own benchmarks show frontier models agree essentially one hundred percent of the time on knowable facts. That ceiling is honest, not a bug — it means the disagreement signal is sparse and Prism's value on its own is audit trail, failover, and compliance labeling, not accuracy improvement.</p>
+        </div>
+        <div>
+          <h3>Layer 2 — QGE</h3>
+          <p>QGE is Mist's in-house structural hallucination detector. It analyzes the output itself — grammatical coherence, internal consistency, statistical signatures that distinguish retrieval from fabrication. No external documents required. No RAG dependency. No "are you sure" self-reflection.</p>
+          <p style="color:#525252;font-size:14px;margin-top:12px;"><strong>Benchmark:</strong> +26.1 percentage points mean detection over the published state of the art on HalluBench (2026-04-07 evaluation). Tracking to 95% precision at 95% recall on the next generation.</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:48px;">The combined decision matrix</h3>
+      <p style="margin-bottom:24px;">Prism and QGE together route every verified query into one of four buckets. The second row is the one nothing else catches:</p>
+
+      <div class="table-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Prism agreement</th>
+              <th>QGE score</th>
+              <th>Interpretation</th>
+              <th>Mist action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>All three agree</td>
+              <td>Low</td>
+              <td>Legitimate consensus</td>
+              <td>Return with high-confidence label</td>
+            </tr>
+            <tr style="background:#fef3c7;">
+              <td><strong>All three agree</strong></td>
+              <td><strong>High</strong></td>
+              <td><strong>Shared hallucination — the dangerous case</strong></td>
+              <td><strong>Return "I do not know," log for review</strong></td>
+            </tr>
+            <tr>
+              <td>Models disagree</td>
+              <td>One low, others high</td>
+              <td>Single model got it right</td>
+              <td>Return the low-QGE answer</td>
+            </tr>
+            <tr>
+              <td>Models disagree</td>
+              <td>All high</td>
+              <td>Question outside training coverage</td>
+              <td>Return "I do not know," recommend human review</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:24px;">The shared-hallucination row is what Mist alone catches. Single-model detectors miss it because they see one output. Voting ensembles miss it because voting rewards agreement. RAG misses it if retrieval returns nothing. Mist catches it because QGE sees the structural signature of fabrication and Prism confirms all three independent architectures produced it — a strong signal that the models share a bad prior and cannot be trusted on this particular query. When we detect it, we return "I do not know." A system that knows when it does not know is worth more than one that is usually right.</p>
+
+      <p style="margin-top:16px;color:#525252;font-size:15px;"><strong>Cost and latency.</strong> Prism + QGE is roughly 3–4x the cost of a single-model call and 2–3x the latency (the three providers run in parallel; QGE adds milliseconds, not seconds). Use it where the math justifies it. For everything else, use single-model routing and inspect the audit log if something looks wrong.</p>
+
+      <p style="margin-top:24px;"><a href="blog/cross-model-verification.html" class="btn btn-ghost">Read the full story &rarr;</a> &nbsp; <a href="https://docs.mist.llc/verification.html" class="btn btn-ghost">Technical docs &rarr;</a></p>
+    </div>
+  </section>
+
   <!-- ===== PROVIDERS ===== -->
   <section>
     <div class="container">
@@ -237,6 +307,20 @@ console.log(response.choices[<span class="string">0</span>].message.content);
               <td class="no">DIY</td>
               <td class="partial">DIY chain</td>
               <td class="partial">Basic</td>
+            </tr>
+            <tr>
+              <td><strong>Hallucination detection</strong></td>
+              <td class="yes">Prism + QGE (2 layers)</td>
+              <td class="no">None</td>
+              <td class="no">None (external)</td>
+              <td class="no">None</td>
+            </tr>
+            <tr>
+              <td><strong>Cross-architecture verification</strong></td>
+              <td class="yes">Yes (Prism)</td>
+              <td class="no">DIY</td>
+              <td class="partial">DIY chain</td>
+              <td class="partial">Fallback only</td>
             </tr>
             <tr>
               <td><strong>Open source</strong></td>
