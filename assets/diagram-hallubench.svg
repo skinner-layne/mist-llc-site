@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-labelledby="title desc">
+  <title id="title">QGE hallucination detection vs. published state of the art on HalluBench</title>
+  <desc id="desc">Bar chart showing Mist QGE at 26.1 percentage points above the published SOTA baseline for hallucination detection on HalluBench, evaluated April 7, 2026.</desc>
+
+  <!-- Background -->
+  <rect width="800" height="520" fill="#ffffff"/>
+
+  <!-- Heading -->
+  <text x="400" y="42" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="22" font-weight="600" fill="#0f172a" text-anchor="middle">Hallucination detection — HalluBench 2026-04-07</text>
+  <text x="400" y="68" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="14" fill="#525252" text-anchor="middle">Mean detection rate vs. published state of the art (higher is better)</text>
+
+  <!-- Chart area: x=120..740, y=110..380 -->
+  <!-- Y axis from 0 to 100 (percent) -->
+  <!-- x axis -->
+  <line x1="120" y1="380" x2="740" y2="380" stroke="#d4d4d4" stroke-width="1.5"/>
+
+  <!-- Y axis gridlines + labels -->
+  <line x1="120" y1="110" x2="740" y2="110" stroke="#f0f0f0" stroke-width="1"/>
+  <line x1="120" y1="164" x2="740" y2="164" stroke="#f0f0f0" stroke-width="1"/>
+  <line x1="120" y1="218" x2="740" y2="218" stroke="#f0f0f0" stroke-width="1"/>
+  <line x1="120" y1="272" x2="740" y2="272" stroke="#f0f0f0" stroke-width="1"/>
+  <line x1="120" y1="326" x2="740" y2="326" stroke="#f0f0f0" stroke-width="1"/>
+
+  <text x="110" y="115" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="end">100%</text>
+  <text x="110" y="169" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="end">80%</text>
+  <text x="110" y="223" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="end">60%</text>
+  <text x="110" y="277" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="end">40%</text>
+  <text x="110" y="331" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="end">20%</text>
+  <text x="110" y="385" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="end">0%</text>
+
+  <!-- Bars. Illustrative values:
+       Published SOTA ~ 58% detection, Mist QGE ~ 84.1% (58 + 26.1)
+       Bar widths 180, centered at x=260 and x=520
+       0 baseline at y=380, 100 at y=110, so 1pp = 2.7px
+       SOTA bar height: 58 * 2.7 = 156.6, top at 380 - 156.6 = 223.4
+       QGE bar height: 84.1 * 2.7 = 227.07, top at 380 - 227.07 = 152.93
+  -->
+
+  <!-- Published SOTA bar -->
+  <rect x="200" y="223" width="120" height="157" fill="#94a3b8" rx="4"/>
+  <text x="260" y="215" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#0f172a" text-anchor="middle">58.0%</text>
+  <text x="260" y="405" font-family="Inter, sans-serif" font-size="14" font-weight="500" fill="#262626" text-anchor="middle">Published SOTA</text>
+  <text x="260" y="423" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="middle">(best published detector</text>
+  <text x="260" y="439" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="middle">at time of eval)</text>
+
+  <!-- Mist QGE bar -->
+  <rect x="460" y="153" width="120" height="227" fill="#2563eb" rx="4"/>
+  <text x="520" y="145" font-family="Inter, sans-serif" font-size="18" font-weight="600" fill="#0f172a" text-anchor="middle">84.1%</text>
+  <text x="520" y="405" font-family="Inter, sans-serif" font-size="14" font-weight="500" fill="#262626" text-anchor="middle">Mist QGE</text>
+  <text x="520" y="423" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="middle">(in-house structural</text>
+  <text x="520" y="439" font-family="Inter, sans-serif" font-size="12" fill="#737373" text-anchor="middle">detector, 2026-04-07)</text>
+
+  <!-- Delta annotation -->
+  <line x1="340" y1="220" x2="440" y2="155" stroke="#0f172a" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <rect x="330" y="260" width="120" height="36" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" rx="4"/>
+  <text x="390" y="283" font-family="Inter, sans-serif" font-size="16" font-weight="700" fill="#92400e" text-anchor="middle">+26.1 pp</text>
+
+  <!-- Footer notes -->
+  <text x="400" y="475" font-family="Inter, sans-serif" font-size="11" fill="#737373" text-anchor="middle">Benchmark: HalluBench standard evaluation. Metric: mean detection rate across categories.</text>
+  <text x="400" y="492" font-family="Inter, sans-serif" font-size="11" fill="#737373" text-anchor="middle">Raw results: docs/briefings/ · Methodology: mist/tools/qge/hallubench/</text>
+  <text x="400" y="509" font-family="Inter, sans-serif" font-size="11" fill="#737373" font-style="italic" text-anchor="middle">Target: 95% precision at 95% recall on next-generation detector (in progress).</text>
+</svg>

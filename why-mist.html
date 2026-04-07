@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="cube-address" content="110.000.111">
+  <meta name="description" content="Why enterprises pick Mist Dynamics: five-layer tenant isolation verified in production, Prism + QGE hallucination detection with +26.1pp HalluBench SOTA, direct enterprise provider contracts, and the honest-failures posture that makes the benchmarks credible.">
+  <title>Why Mist — Mist Dynamics</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .hero-why {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 96px 0 72px;
+    }
+    .hero-why h1 {
+      font-size: clamp(36px, 5vw, 56px);
+      letter-spacing: -0.025em;
+      margin-bottom: 24px;
+      max-width: 18ch;
+    }
+    .hero-why p.lede {
+      font-size: 20px;
+      line-height: 1.5;
+      color: #cbd5e1;
+      max-width: 58ch;
+    }
+    .section-why {
+      padding: 96px 0;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .section-why .section-eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #2563eb;
+      margin-bottom: 12px;
+    }
+    .section-why h2 {
+      font-size: clamp(28px, 3.5vw, 40px);
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      max-width: 22ch;
+    }
+    .section-why p.section-lede {
+      font-size: 17px;
+      line-height: 1.65;
+      color: #525252;
+      max-width: 68ch;
+      margin-bottom: 36px;
+    }
+    .diagram-wrap {
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 32px 0 24px;
+    }
+    .diagram-wrap img {
+      display: block;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      height: auto;
+    }
+    .diagram-caption {
+      text-align: center;
+      font-size: 13px;
+      color: #737373;
+      margin-top: 12px;
+    }
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+    .persona-card {
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 24px 24px 20px;
+      background: #fafafa;
+      transition: border-color 0.15s;
+    }
+    .persona-card:hover {
+      border-color: #2563eb;
+    }
+    .persona-card h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .persona-card p.persona-lead {
+      font-size: 14px;
+      color: #525252;
+      line-height: 1.55;
+      margin-bottom: 16px;
+      min-height: 60px;
+    }
+    .persona-card .persona-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 18px;
+      font-size: 13px;
+      color: #262626;
+    }
+    .persona-card .persona-list li {
+      padding-left: 16px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+    .persona-card .persona-list li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #2563eb;
+    }
+    .persona-card .persona-cta {
+      font-size: 13px;
+      font-weight: 500;
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .persona-card .persona-cta:hover {
+      text-decoration: underline;
+    }
+    .honest-section {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 12px;
+      padding: 32px;
+      margin: 40px 0;
+    }
+    .honest-section h3 {
+      font-size: 20px;
+      color: #92400e;
+      margin-bottom: 12px;
+      letter-spacing: -0.015em;
+    }
+    .honest-section p {
+      font-size: 15px;
+      line-height: 1.65;
+      color: #451a03;
+      margin-bottom: 12px;
+    }
+    .closing-cta {
+      padding: 96px 0;
+      text-align: center;
+      background: #f5f5f5;
+    }
+    .closing-cta h2 {
+      font-size: clamp(28px, 3.5vw, 40px);
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .closing-cta p {
+      font-size: 17px;
+      color: #525252;
+      max-width: 58ch;
+      margin: 0 auto 32px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.getElementById('navlinks').classList.toggle('open')">Menu</button>
+      <ul class="nav-links" id="navlinks">
+        <li><a href="product.html">Product</a></li>
+        <li><a href="why-mist.html">Why Mist</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+        <li><a href="security.html">Security</a></li>
+        <li><a href="blog/index.html">Blog</a></li>
+        <li><a href="https://docs.mist.llc">Docs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="contact.html" class="btn btn-primary">Talk to Sales</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero-why">
+    <div class="container">
+      <span class="eyebrow" style="color:#60a5fa;">Why Mist</span>
+      <h1>The AI infrastructure built for the buyer whose contract has to survive an audit.</h1>
+      <p class="lede">Five guarantees nobody else in this space can make — backed by verification logs, published benchmarks, and a direct enterprise commercial structure that flows through to your own compliance posture.</p>
+    </div>
+  </section>
+
+  <!-- ===== GUARANTEE 1: ISOLATION ===== -->
+  <section class="section-why">
+    <div class="container">
+      <div class="section-eyebrow">Guarantee 1 — Isolation</div>
+      <h2>Per-customer legal entity. Five-layer technical enforcement. Verified end-to-end.</h2>
+      <p class="section-lede">Every Mist Dynamics enterprise customer gets their own Series LLC — a distinct legal entity you can name in your MSA, DPA, and SOC 2 evidence chain. The legal separation is enforced at five independent technical layers, any one of which is sufficient to prevent cross-customer contamination. No shared-tenant AI vendor on the market offers this.</p>
+
+      <div class="diagram-wrap">
+        <img src="assets/diagram-isolation-layers.svg" alt="Five-layer tenant isolation architecture: Legal, Provisioning, Network, Secrets, Ledger. Each layer verified end-to-end in production-shape staging on 2026-04-07.">
+        <div class="diagram-caption">Five-layer isolation verified end-to-end, 2026-04-07. Verification logs on request.</div>
+      </div>
+
+      <p style="font-size:15px; color:#525252; max-width:68ch;">What this means in procurement terms: your vendor contract names a specific legal entity that no other customer shares. Your DPA flow-down is clean. Your data never traverses infrastructure where another customer could reach it, not because the software is correct but because the layers that would have to fail are independent and each is separately verified.</p>
+
+      <p style="font-size:14px; color:#737373; margin-top:16px;">
+        <a href="blog/series-llc-compliance.html" style="color:#2563eb;">Read the full Series LLC story →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== GUARANTEE 2: HALLUCINATION DETECTION ===== -->
+  <section class="section-why" style="background:#fafafa;">
+    <div class="container">
+      <div class="section-eyebrow">Guarantee 2 — Hallucination detection</div>
+      <h2>Prism + QGE — we catch the failure class nothing else sees.</h2>
+      <p class="section-lede">Every other AI infrastructure vendor ships one verification layer — cross-model voting, or a single-model detector. Each of those, on its own, has a specific blind spot. Mist runs both layers on every verified query. The combination catches a failure class called <strong>shared hallucinations</strong> — cases where three independent models produce the same confident fabrication because their training data overlaps — that no single-layer system can detect.</p>
+
+      <div class="diagram-wrap">
+        <img src="assets/diagram-hallubench.svg" alt="Bar chart: Published SOTA at 58 percent detection, Mist QGE at 84.1 percent detection on HalluBench, a delta of plus 26.1 percentage points, evaluated April 7, 2026.">
+        <div class="diagram-caption">QGE on HalluBench: +26.1 percentage points over published SOTA (2026-04-07 evaluation).</div>
+      </div>
+
+      <p style="font-size:15px; color:#525252; max-width:68ch; margin-top:24px;">The layers: <strong>Prism</strong> dispatches your prompt to three architecturally distinct models (OpenAI, Anthropic, Google) in parallel and produces the full audit trail. <strong>QGE</strong> is our in-house structural hallucination detector — no external documents, no RAG, no self-reflection prompting. It analyzes the output itself for statistical signatures of fabrication. When both layers agree an output looks like fabrication, Mist returns "I do not know" and logs the case for review. A system that knows when it does not know is worth more than one that is usually right.</p>
+
+      <p style="font-size:14px; color:#737373; margin-top:16px;">
+        <a href="blog/cross-model-verification.html" style="color:#2563eb;">Read the full Prism + QGE story →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== GUARANTEE 3: COMMERCIAL STRUCTURE ===== -->
+  <section class="section-why">
+    <div class="container">
+      <div class="section-eyebrow">Guarantee 3 — Commercial structure</div>
+      <h2>Direct enterprise contracts with every provider. Not retail resale.</h2>
+      <p class="section-lede">Mist Dynamics holds direct enterprise agreements with OpenAI, Anthropic, Google, Mistral, DeepSeek, and every other model provider in our routing table. Not retail API accounts. Not high-volume developer accounts. Enterprise agreements with named commercial terms, downstream metered access rights, and DPA flow-down obligations.</p>
+      <p class="section-lede">This is the legal foundation of the entire business model. Most provider Terms of Service explicitly prohibit using a retail account to resell access. The exception is an enterprise agreement that permits downstream commercial deployment — and that's the structure we operate under. Vendors who aggregate retail accounts are one ToS change away from account termination cascading across their whole customer base. We are not.</p>
+      <p style="font-size:15px; color:#525252; max-width:68ch;">What this means for your audit: the liability chain from provider → Mist Dynamics → your MSA is clean and defensible. Three documents, one auditable relationship, each with a named legal counterparty.</p>
+      <p style="font-size:14px; color:#737373; margin-top:16px;">
+        <a href="blog/openrouter-comparison.html" style="color:#2563eb;">How this compares to other aggregators →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== GUARANTEE 4: VERIFICATION DEPTH CURVE ===== -->
+  <section class="section-why" style="background:#fafafa;">
+    <div class="container">
+      <div class="section-eyebrow">Guarantee 4 — Verification depth curve</div>
+      <h2>Six execution protocols. Tune depth to the stakes of each query.</h2>
+      <p class="section-lede">Every competitor treats verification as a single mode: on or off. Mist ships six distinct execution protocols, each with explicit cost and latency trade-offs, selectable per request.</p>
+
+      <div style="overflow-x:auto; margin: 32px 0;">
+        <table class="data" style="min-width:680px;">
+          <thead>
+            <tr>
+              <th>Protocol</th>
+              <th>Mechanism</th>
+              <th>Cost</th>
+              <th>Latency</th>
+              <th>Use when</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Single</strong></td><td>One model</td><td>1×</td><td>1×</td><td>High throughput, low stakes</td></tr>
+            <tr><td><strong>Probe</strong></td><td>One model + re-read</td><td>1.5×</td><td>1.3×</td><td>Spot-checking a new model</td></tr>
+            <tr><td><strong>Prism</strong></td><td>3-model parallel + QGE</td><td>3–4×</td><td>2–3×</td><td>Standard verified mode</td></tr>
+            <tr><td><strong>Debate</strong></td><td>Affirmative/negative + judge</td><td>5–7×</td><td>3–5×</td><td>High-stakes reasoning</td></tr>
+            <tr><td><strong>Parliament</strong></td><td>8–50 model deliberation</td><td>10–50×</td><td>8–20×</td><td>Irreversible decisions</td></tr>
+            <tr><td><strong>Cascade</strong></td><td>Adaptive multi-round</td><td>Variable</td><td>Variable</td><td>Unknown depth</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="font-size:15px; color:#525252; max-width:68ch;">Your autocomplete endpoint runs Single. Your legal research endpoint runs Prism. Your court filing runs Debate. Same infrastructure, six products, selected per request via a single verification field. You pay for depth only where the math justifies it.</p>
+    </div>
+  </section>
+
+  <!-- ===== GUARANTEE 5: HONEST FAILURES ===== -->
+  <section class="section-why">
+    <div class="container">
+      <div class="section-eyebrow">Guarantee 5 — The thing you can't fake</div>
+      <h2>We publish our failures.</h2>
+      <p class="section-lede">This is the guarantee that makes the other four credible. Every AI vendor claims benchmarks; few publish negative results. We do.</p>
+
+      <div class="honest-section">
+        <h3>The Prism null result we published</h3>
+        <p>We ran our own cross-model accuracy benchmark on Prism. We expected a measurable improvement over single-model output on factual recall. The benchmark returned <strong>0.0% accuracy delta</strong> across 35 questions (5 easy + 15 hand-curated tail facts). Current frontier models are saturated on knowable facts — they don't hallucinate on questions Wikipedia has, and they don't disagree with each other on those questions either. The simple "Prism reduces hallucinations" pitch was falsified.</p>
+        <p>We published the negative result. We updated the spec (<code>docs/specs/VERIFICATION_EVIDENCE_AUDIT.md</code> is on version 2 for exactly this reason). We rewrote our marketing content to match. We pivoted to the Prism + QGE combined story — where the value is catching shared hallucinations, a failure class the single-layer pitch could not honestly claim.</p>
+        <p>This is the only AI vendor pitch where you can read the benchmark that killed the simple version of the claim, alongside the benchmark that supports the more defensible version. If we hid failures, you wouldn't be able to trust our successes. That we didn't is the answer.</p>
+      </div>
+
+      <p style="font-size:15px; color:#525252; max-width:68ch;">Beyond benchmarks, we publish dead-end research papers (<code>docs/papers/DEAD_END_*.md</code>), spec drift corrections with explicit callouts, and revision history on every document where we changed our mind. Sophisticated technical buyers notice the difference. That's the buyer we want.</p>
+    </div>
+  </section>
+
+  <!-- ===== WHO SHOULD READ WHICH PITCH ===== -->
+  <section class="section-why" style="background:#f5f5f5;">
+    <div class="container">
+      <div class="section-eyebrow">By role</div>
+      <h2>Pick the version of this story that matches your role.</h2>
+      <p class="section-lede">Every persona has a different Tier 1 concern. We wrote a deeper pitch for each.</p>
+
+      <div class="persona-grid">
+        <div class="persona-card">
+          <h3>Regulated industries</h3>
+          <p class="persona-lead">CISO, compliance, general counsel, DPO in legal, medical, financial, or government.</p>
+          <ul class="persona-list">
+            <li>5-layer isolation, verified</li>
+            <li>Series LLC as named counterparty</li>
+            <li>Shared-hallucination detection</li>
+            <li>SOC 2-ready audit trail</li>
+          </ul>
+          <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/sales/pitch_regulated_industries.md" class="persona-cta">Read the pitch →</a>
+        </div>
+
+        <div class="persona-card">
+          <h3>Engineering teams</h3>
+          <p class="persona-lead">Technical architects, senior and staff engineers running the POC and reading the benchmarks themselves.</p>
+          <ul class="persona-list">
+            <li>Six verification protocols</li>
+            <li>47 task types + Assayer feedback</li>
+            <li>Honest benchmark publication</li>
+            <li>Drop-in OpenAI-compatible API</li>
+          </ul>
+          <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/sales/pitch_engineering_teams.md" class="persona-cta">Read the pitch →</a>
+        </div>
+
+        <div class="persona-card">
+          <h3>Procurement &amp; vendor risk</h3>
+          <p class="persona-lead">The team whose signoff the whole enterprise deal depends on. Vendor questionnaires, DPAs, SOC 2 mapping.</p>
+          <ul class="persona-list">
+            <li>Direct enterprise provider contracts</li>
+            <li>Series LLC legal counterparty</li>
+            <li>Clean DPA flow-down chain</li>
+            <li>Vendor risk questionnaire ready</li>
+          </ul>
+          <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/sales/pitch_procurement_vendor_risk.md" class="persona-cta">Read the pitch →</a>
+        </div>
+
+        <div class="persona-card">
+          <h3>Forward-looking CTOs</h3>
+          <p class="persona-lead">CTO, VP Eng, Chief AI Officer picking infrastructure that has to still be right in 18 months.</p>
+          <ul class="persona-list">
+            <li>Agent-Oriented Architecture</li>
+            <li>Parallel dispatch as default</li>
+            <li>Durable artifact protocols</li>
+            <li>MCP-native integration</li>
+          </ul>
+          <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/sales/pitch_forward_looking_cto.md" class="persona-cta">Read the pitch →</a>
+        </div>
+
+        <div class="persona-card">
+          <h3>Research labs</h3>
+          <p class="persona-lead">Research computing, PIs with large AI budgets, scientific publishing platforms. Reproducibility matters.</p>
+          <ul class="persona-list">
+            <li>Honest failures posture</li>
+            <li>Reproducible verification runs</li>
+            <li>Citable methods-section artifacts</li>
+            <li>Grant-compliance audit trail</li>
+          </ul>
+          <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/sales/pitch_research_labs.md" class="persona-cta">Read the pitch →</a>
+        </div>
+
+        <div class="persona-card">
+          <h3>Short on time?</h3>
+          <p class="persona-lead">One page, ~700 words. The whole story condensed for cold outreach or executive review.</p>
+          <ul class="persona-list">
+            <li>Five guarantees in brief</li>
+            <li>Key verification numbers</li>
+            <li>What we do not do well</li>
+            <li>First-call checklist</li>
+          </ul>
+          <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/sales/one_page_summary.md" class="persona-cta">Read the one-pager →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CLOSING CTA ===== -->
+  <section class="closing-cta">
+    <div class="container">
+      <h2>Talk to us about one real workflow.</h2>
+      <p>Bring one query where a confident wrong answer would hurt your business. We run it through Prism + QGE on a staging instance in under an hour and show you the audit trail. No slides, no pitch deck, just the pipeline running on your actual problem.</p>
+      <a href="contact.html" class="btn btn-primary btn-lg">Talk to Sales</a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand">Mist<span class="brand-sub">Dynamics</span></a>
+          <p>Enterprise AI routing infrastructure. One key. Every model. One bill.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="product.html">Routing</a></li>
+            <li><a href="product.html#verification">Verification</a></li>
+            <li><a href="why-mist.html">Why Mist</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="security.html">Security</a></li>
+            <li><a href="blog/index.html">Blog</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="legal/terms.html">Terms</a></li>
+            <li><a href="legal/privacy.html">Privacy</a></li>
+            <li><a href="legal/dpa.html">DPA</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Mist Dynamics LLC. All rights reserved.</div>
+        <div>Mist Dynamics LLC is a Delaware limited liability company.</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" role="img" aria-labelledby="title desc">
+  <title id="title">Mist Dynamics five-layer tenant isolation architecture</title>
+  <desc id="desc">Diagram showing the five independent layers of tenant isolation in Mist Dynamics: Legal (Series LLC), Provisioning (S4 invariant), Network (Kubernetes NetworkPolicy), Secrets (HashiCorp Vault), and Ledger (Postgres append-only triggers). Each layer is independently verified in production-shape staging.</desc>
+
+  <!-- Background -->
+  <rect width="900" height="640" fill="#ffffff"/>
+
+  <!-- Heading -->
+  <text x="450" y="40" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="22" font-weight="600" fill="#0f172a" text-anchor="middle">Five-layer tenant isolation — verified end-to-end</text>
+  <text x="450" y="64" font-family="Inter, sans-serif" font-size="13" fill="#525252" text-anchor="middle">Each layer independently sufficient. No single-point failure can cross the tenant boundary.</text>
+
+  <!-- Layer rows: 5 stacked bands
+       Each: y offset, badge color, label, mechanism, verification text
+       x=70..830, row height=86, gap=12
+  -->
+
+  <!-- Row 1: Legal (Series LLC) -->
+  <g>
+    <rect x="70" y="92" width="760" height="86" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
+    <circle cx="120" cy="135" r="28" fill="#f59e0b"/>
+    <text x="120" y="143" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+    <text x="170" y="122" font-family="Inter, sans-serif" font-size="16" font-weight="600" fill="#0f172a">LEGAL</text>
+    <text x="170" y="143" font-family="Inter, sans-serif" font-size="14" fill="#262626">Series LLC per customer — distinct legal entity, distinct operating agreement, distinct liability boundary.</text>
+    <text x="170" y="162" font-family="Inter, sans-serif" font-size="12" fill="#525252">Named party in your MSA, DPA, and SOC 2 evidence. Enforced by Delaware Series LLC filing.</text>
+    <text x="795" y="135" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#16a34a" text-anchor="end">✓ VERIFIED</text>
+  </g>
+
+  <!-- Row 2: Provisioning (S4 invariant) -->
+  <g>
+    <rect x="70" y="190" width="760" height="86" fill="#dbeafe" stroke="#2563eb" stroke-width="2" rx="8"/>
+    <circle cx="120" cy="233" r="28" fill="#2563eb"/>
+    <text x="120" y="241" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+    <text x="170" y="220" font-family="Inter, sans-serif" font-size="16" font-weight="600" fill="#0f172a">PROVISIONING (S4 invariant)</text>
+    <text x="170" y="241" font-family="Inter, sans-serif" font-size="14" fill="#262626">provision-sovereign.sh refuses to co-locate. Retry on existing sovereign_id rejected:</text>
+    <text x="170" y="260" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#dc2626">ERROR: S4 violation: sovereign pods must never be reused or duplicated.</text>
+    <text x="795" y="233" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#16a34a" text-anchor="end">✓ VERIFIED</text>
+  </g>
+
+  <!-- Row 3: Network (Kubernetes NetworkPolicy) -->
+  <g>
+    <rect x="70" y="288" width="760" height="86" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2" rx="8"/>
+    <circle cx="120" cy="331" r="28" fill="#4f46e5"/>
+    <text x="120" y="339" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+    <text x="170" y="318" font-family="Inter, sans-serif" font-size="16" font-weight="600" fill="#0f172a">NETWORK (Kubernetes NetworkPolicy)</text>
+    <text x="170" y="339" font-family="Inter, sans-serif" font-size="14" fill="#262626">Pod selects on sovereign-id={your_id}. No allow rule names another sovereign.</text>
+    <text x="170" y="358" font-family="Inter, sans-serif" font-size="12" fill="#525252">Cross-tenant traffic is structurally impossible, not administratively prohibited.</text>
+    <text x="795" y="331" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#16a34a" text-anchor="end">✓ VERIFIED</text>
+  </g>
+
+  <!-- Row 4: Secrets (Vault) -->
+  <g>
+    <rect x="70" y="386" width="760" height="86" fill="#f0fdf4" stroke="#16a34a" stroke-width="2" rx="8"/>
+    <circle cx="120" cy="429" r="28" fill="#16a34a"/>
+    <text x="120" y="437" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+    <text x="170" y="416" font-family="Inter, sans-serif" font-size="16" font-weight="600" fill="#0f172a">SECRETS (HashiCorp Vault)</text>
+    <text x="170" y="437" font-family="Inter, sans-serif" font-size="14" fill="#262626">AppRole scoped to secret/mist/series/{your_id}/*. Cross-series reads return:</text>
+    <text x="170" y="456" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#dc2626">Code: 403 — 1 error occurred: permission denied</text>
+    <text x="795" y="429" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#16a34a" text-anchor="end">✓ VERIFIED</text>
+  </g>
+
+  <!-- Row 5: Ledger (Postgres append-only) -->
+  <g>
+    <rect x="70" y="484" width="760" height="86" fill="#fdf2f8" stroke="#be185d" stroke-width="2" rx="8"/>
+    <circle cx="120" cy="527" r="28" fill="#be185d"/>
+    <text x="120" y="535" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+    <text x="170" y="514" font-family="Inter, sans-serif" font-size="16" font-weight="600" fill="#0f172a">LEDGER (Postgres append-only triggers)</text>
+    <text x="170" y="535" font-family="Inter, sans-serif" font-size="14" fill="#262626">Saline audit ledger refuses UPDATE/DELETE via refuse_mutation() trigger:</text>
+    <text x="170" y="554" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#dc2626">ERROR: append-only table: UPDATE not permitted on transactions_2026_04</text>
+    <text x="795" y="527" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#16a34a" text-anchor="end">✓ VERIFIED</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="450" y="605" font-family="Inter, sans-serif" font-size="11" fill="#737373" text-anchor="middle">All five layers verified end-to-end on mist-core staging, 2026-04-07.</text>
+  <text x="450" y="622" font-family="Inter, sans-serif" font-size="11" fill="#737373" font-style="italic" text-anchor="middle">Verification logs available under NDA. Specs: INSTANCE_ISOLATION_ARCHITECTURE.md, SERIES_LLC_API_PROVISIONING.md, K8S_SOVEREIGN_DEPLOYMENT.md.</text>
+</svg>
