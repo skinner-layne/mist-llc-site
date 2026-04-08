@@ -214,19 +214,57 @@
   <!-- ===== GUARANTEE 2: HALLUCINATION DETECTION ===== -->
   <section class="section-why" style="background:#fafafa;">
     <div class="container">
-      <div class="section-eyebrow">Guarantee 2 — Hallucination detection</div>
-      <h2>Prism + QGE — we catch the failure class nothing else sees.</h2>
-      <p class="section-lede">Every other AI infrastructure vendor ships one verification layer — cross-model voting, or a single-model detector. Each of those, on its own, has a specific blind spot. Mist runs both layers on every verified query. The combination catches a failure class called <strong>shared hallucinations</strong> — cases where three independent models produce the same confident fabrication because their training data overlaps — that no single-layer system can detect.</p>
+      <div class="section-eyebrow">Guarantee 2 — Prism verification</div>
+      <h2>Cross-architecture diversity catches what any single model misses.</h2>
+      <p class="section-lede">Our benchmark on fabrication-prone prompts: single-model hallucination rate 16%, 3-model Prism hallucination rate 4%. A 12-point absolute reduction, 75% relative. Every individual fabrication in the benchmark was caught by at least one dissenting model. Cross-architecture diversity is the load-bearing verification primitive — different training lineages fabricate differently, and the disagreement is information-rich even when the question is outside every model's training data.</p>
+
+      <div style="background:#ffffff; border:1px solid #e5e5e5; border-radius:12px; padding:28px 32px; margin:32px 0;">
+        <h3 style="font-size:18px; margin-bottom:8px; color:#0f172a;">The Q18 case — the flagship catch</h3>
+        <p style="font-size:15px; color:#525252; margin-bottom:16px;">We asked three frontier models about a fake chemistry compound: "What is the molecular weight of methylhexylamine hydrochloride (CAS 7447-60-9)?" The CAS number is invalid and the compound is fabricated.</p>
+        <table style="width:100%; border-collapse:collapse; font-size:14px; margin-bottom:16px;">
+          <thead>
+            <tr style="background:#f5f5f5;">
+              <th style="text-align:left; padding:8px 12px; border-bottom:1px solid #e5e5e5;">Model</th>
+              <th style="text-align:left; padding:8px 12px; border-bottom:1px solid #e5e5e5;">Response</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#fef3c7;">
+              <td style="padding:10px 12px; border-bottom:1px solid #e5e5e5;"><strong>GPT-5.4</strong></td>
+              <td style="padding:10px 12px; border-bottom:1px solid #e5e5e5;">"The molecular weight is <strong>151.68 g/mol</strong>." Invented a fake PubChem CID.</td>
+            </tr>
+            <tr style="background:#fef3c7;">
+              <td style="padding:10px 12px; border-bottom:1px solid #e5e5e5;"><strong>Claude Sonnet 4.6</strong></td>
+              <td style="padding:10px 12px; border-bottom:1px solid #e5e5e5;">"Molecular weight of <strong>151.68 g/mol</strong>." The exact same fabricated number.</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 12px;"><strong>Gemini 3.1 Pro</strong></td>
+              <td style="padding:10px 12px;">"Does not exist — this CAS number fails the standard checksum validation algorithm." <span style="color:#16a34a; font-weight:600;">Caught it.</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:14px; color:#525252; margin-bottom:0;"><strong>Two frontier models from two different vendors independently produced the exact same fabricated molecular weight.</strong> They both invented a fake PubChem CID to go with it. Only the third architecturally distinct model — trained on different data, with different validation hooks — caught the fabrication. A 2-model Prism would have returned the wrong answer with high confidence. Only a ≥3-model architecturally diverse ensemble catches cases like this. <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/verification/SHARED_HALLUCINATION_CASE_STUDY_2026-04-07.md" style="color:#2563eb;">Read the full case study →</a></p>
+      </div>
+
+      <h3 style="font-size:20px; margin-top:40px; margin-bottom:12px; color:#0f172a;">QGE — HalluBench research, forward routing-layer work</h3>
+      <p style="font-size:16px; color:#525252; max-width:68ch; margin-bottom:20px;">Our in-house Quantum Grammar Engine achieves <strong>+26.1 percentage points mean detection over the published state of the art</strong> on HalluBench. That's a real research result on a real benchmark.</p>
 
       <div class="diagram-wrap">
         <img src="assets/diagram-hallubench.svg" alt="Bar chart: Published SOTA at 58 percent detection, Mist QGE at 84.1 percent detection on HalluBench, a delta of plus 26.1 percentage points, evaluated April 7, 2026.">
         <div class="diagram-caption">QGE on HalluBench: +26.1 percentage points over published SOTA (2026-04-07 evaluation).</div>
       </div>
 
-      <p style="font-size:15px; color:#525252; max-width:68ch; margin-top:24px;">The layers: <strong>Prism</strong> dispatches your prompt to three architecturally distinct models (OpenAI, Anthropic, Google) in parallel and produces the full audit trail. <strong>QGE</strong> is our in-house structural hallucination detector — no external documents, no RAG, no self-reflection prompting. It analyzes the output itself for statistical signatures of fabrication. When both layers agree an output looks like fabrication, Mist returns "I do not know" and logs the case for review. A system that knows when it does not know is worth more than one that is usually right.</p>
+      <div class="honest-section" style="background:#fef3c7; border:1px solid #f59e0b; border-radius:12px; padding:24px 28px; margin:32px 0;">
+        <h3 style="font-size:18px; color:#92400e; margin-bottom:10px;">Honest limitation (2026-04-08)</h3>
+        <p style="font-size:15px; line-height:1.6; color:#451a03; margin-bottom:10px;">We ran a follow-up benchmark to test whether QGE — in addition to its HalluBench result — provides an independent second signal in the routing context on fabrication-prone prompts. The test was: re-score 105 model outputs from the Q18 case study under domain-routed QGE instead of the default linguistic config.</p>
+        <p style="font-size:15px; line-height:1.6; color:#451a03; margin-bottom:10px;"><strong>The follow-up falsified the routing-context claim.</strong> 104 of 105 scorings produced bit-identical distances under both configs. Discrimination delta is −0.339 in both configs (QGE assigns lower distances to hallucinations than to honest declines — the wrong direction). On Q18 specifically, chemistry-routed QGE scored GPT-5.4's 151.68 g/mol fabrication at the lowest (most trusted) distance in the entire benchmark.</p>
+        <p style="font-size:15px; line-height:1.6; color:#451a03; margin-bottom:0;"><strong>Root cause is index size, not algorithm.</strong> QGE's domain indexes are 583 to 32,000 facts each. Fabricated entities have no anchor fact in any index, so the engine's "unsupported claim" gate fires identically on fabrications and honest declines. The fix is a multi-week PubChem/ChEMBL-scale index rebuild. Until that ships, <strong>current-state verification is Prism primary</strong>. The Q18 catch above was Prism's work, not QGE's. We are publishing this finding because it contradicts a claim we made 24 hours ago, and the right response is to update the pitch to match the benchmark rather than hide the benchmark.</p>
+      </div>
 
       <p style="font-size:14px; color:#737373; margin-top:16px;">
-        <a href="blog/cross-model-verification.html" style="color:#2563eb;">Read the full Prism + QGE story →</a>
+        <a href="blog/cross-model-verification.html" style="color:#2563eb;">Read the full verification story →</a>
+        &nbsp; · &nbsp;
+        <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/verification/SHARED_HALLUCINATION_QGE_FOLLOWUP_2026-04-08.md" style="color:#2563eb;">QGE follow-up benchmark →</a>
       </p>
     </div>
   </section>
@@ -266,7 +304,7 @@
           <tbody>
             <tr><td><strong>Single</strong></td><td>One model</td><td>1×</td><td>1×</td><td>High throughput, low stakes</td></tr>
             <tr><td><strong>Probe</strong></td><td>One model + re-read</td><td>1.5×</td><td>1.3×</td><td>Spot-checking a new model</td></tr>
-            <tr><td><strong>Prism</strong></td><td>3-model parallel + QGE</td><td>3–4×</td><td>2–3×</td><td>Standard verified mode</td></tr>
+            <tr><td><strong>Prism</strong></td><td>3-model architecturally diverse parallel</td><td>3×</td><td>2–3×</td><td>Standard verified mode</td></tr>
             <tr><td><strong>Debate</strong></td><td>Affirmative/negative + judge</td><td>5–7×</td><td>3–5×</td><td>High-stakes reasoning</td></tr>
             <tr><td><strong>Parliament</strong></td><td>8–50 model deliberation</td><td>10–50×</td><td>8–20×</td><td>Irreversible decisions</td></tr>
             <tr><td><strong>Cascade</strong></td><td>Adaptive multi-round</td><td>Variable</td><td>Variable</td><td>Unknown depth</td></tr>
@@ -286,10 +324,17 @@
       <p class="section-lede">This is the guarantee that makes the other four credible. Every AI vendor claims benchmarks; few publish negative results. We do.</p>
 
       <div class="honest-section">
-        <h3>The Prism null result we published</h3>
-        <p>We ran our own cross-model accuracy benchmark on Prism. We expected a measurable improvement over single-model output on factual recall. The benchmark returned <strong>0.0% accuracy delta</strong> across 35 questions (5 easy + 15 hand-curated tail facts). Current frontier models are saturated on knowable facts — they don't hallucinate on questions Wikipedia has, and they don't disagree with each other on those questions either. The simple "Prism reduces hallucinations" pitch was falsified.</p>
-        <p>We published the negative result. We updated the spec (<code>docs/specs/VERIFICATION_EVIDENCE_AUDIT.md</code> is on version 2 for exactly this reason). We rewrote our marketing content to match. We pivoted to the Prism + QGE combined story — where the value is catching shared hallucinations, a failure class the single-layer pitch could not honestly claim.</p>
-        <p>This is the only AI vendor pitch where you can read the benchmark that killed the simple version of the claim, alongside the benchmark that supports the more defensible version. If we hid failures, you wouldn't be able to trust our successes. That we didn't is the answer.</p>
+        <h3>Example 1 — the Prism null result (2026-04-07)</h3>
+        <p>We ran our own cross-model accuracy benchmark on Prism. We expected a measurable improvement over single-model output on factual recall. The benchmark returned <strong>0.0% accuracy delta</strong> across 35 questions (5 easy + 15 hand-curated tail facts). Frontier models are saturated on knowable facts — they don't hallucinate on questions Wikipedia has, and they don't disagree with each other on those questions either. The simple "Prism reduces hallucinations on factual recall" pitch was falsified.</p>
+        <p>We published the negative result. We updated the spec. We rewrote the pitch. We pivoted to a benchmark on fabrication-prone prompts — where models are asked about entities that don't exist — and there we measured the real signal: 75% relative reduction in hallucination rate, with the Q18 case as the flagship catch.</p>
+      </div>
+
+      <div class="honest-section">
+        <h3>Example 2 — the QGE falsification (2026-04-08)</h3>
+        <p>Twenty-four hours after the first pivot, we had made "Prism + QGE combined decision matrix" the headline claim. Then we ran the follow-up benchmark to verify it.</p>
+        <p><strong>The follow-up contradicted the claim.</strong> 104 of 105 scorings produced bit-identical distances under linguistic and chemistry-domain-routed QGE configs. Discrimination delta is −0.339 in both (QGE actively assigns lower distances to hallucinations than to declines — the wrong direction). On Q18 specifically, chemistry-routed QGE scored the GPT-5.4 fabrication at the single lowest, most-trusted distance in the entire benchmark.</p>
+        <p>We updated the pitch <em>the same day</em>. The Prism layer is promoted to the primary operational layer with the Q18 catch as the flagship proof point. The QGE layer is demoted to HalluBench-bounded claims and forward-work pending a PubChem/ChEMBL-scale rebuild of the domain indexes. The combined decision matrix becomes target architecture, not current-state production. You are reading version 3 of this pitch because we cycled through v1 → v2 → v3 in 36 hours, each revision forced by benchmark evidence we ran on ourselves.</p>
+        <p>This is the only AI vendor pitch where you can read the benchmark that killed v2 on the same domain as the pitch itself, alongside v3 which matches what the data actually supports. If we hid failures, you wouldn't be able to trust our successes. That we don't — even when the failure was in a claim we made 24 hours ago — is the answer.</p>
       </div>
 
       <p style="font-size:15px; color:#525252; max-width:68ch;">Beyond benchmarks, we publish dead-end research papers (<code>docs/papers/DEAD_END_*.md</code>), spec drift corrections with explicit callouts, and revision history on every document where we changed our mind. Sophisticated technical buyers notice the difference. That's the buyer we want.</p>

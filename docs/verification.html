@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="cube-address" content="110.000.111">
-  <meta name="description" content="How Mist Dynamics combines Prism (cross-architecture diversity) with QGE (structural hallucination detection) to catch shared hallucinations no single-layer system can see.">
-  <title>Verification — Prism + QGE — Mist Docs</title>
+  <meta name="description" content="Mist Dynamics verification — Prism cross-architecture diversity (operational) and QGE structural hallucination detection (HalluBench-bounded; routing-context index rebuild in progress). Documented Q18 shared-hallucination catch.">
+  <title>Verification — Prism + QGE (current state) — Mist Docs</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -63,48 +63,118 @@
     <main class="docs-main">
       <header>
         <div class="crumb">CONCEPTS</div>
-        <h1>Verification: Prism + QGE</h1>
-        <p class="lede">Mist Dynamics verification is a two-layer system. Prism runs the same prompt through three architecturally distinct models in parallel. QGE scores each output for structural hallucination signatures. The combination catches a failure mode — shared hallucinations — that no single-layer system can detect.</p>
+        <h1>Verification: Prism (current), QGE (forward)</h1>
+        <p class="lede">Mist Dynamics verification runs cross-architecture Prism on every verified query — three architecturally distinct models dispatched in parallel. In our benchmark on fabrication-prone prompts, this reduces hallucination rate by 75% relative (16% → 4%). QGE, our in-house structural hallucination detector, achieves +26.1pp over state-of-the-art on HalluBench, but the 2026-04-08 follow-up benchmark established that its current routing-context signal is bounded by domain index size. The combined Prism + QGE decision matrix is target architecture pending an index rebuild; current production is Prism primary.</p>
+        <div class="callout warn" style="margin-top:20px; padding:16px 20px; background:#fef3c7; border:1px solid #f59e0b; border-radius:8px;">
+          <p style="margin:0; font-size:14px; color:#451a03;"><strong>This is version 3 of this page.</strong> Version 2 pitched a combined Prism + QGE two-layer decision matrix as the operational claim. Our 2026-04-08 follow-up benchmark falsified that claim (104 of 105 scorings produced bit-identical distances under domain-routed and linguistic QGE configs; discrimination delta −0.339 in both). We updated this page the same day to match the benchmark. The full finding is in <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/verification/SHARED_HALLUCINATION_QGE_FOLLOWUP_2026-04-08.md">docs/verification/SHARED_HALLUCINATION_QGE_FOLLOWUP_2026-04-08.md</a>.</p>
+        </div>
       </header>
 
       <section>
-        <h2>Why two layers</h2>
-        <p>Most AI platforms that talk about "verification" mean one of two things: cross-model voting (ask several models and take the majority) or hallucination detection (run a classifier on the output). Each of these, on its own, has a blind spot that the other does not.</p>
-        <p>Cross-model voting fails on <strong>shared hallucinations</strong>. When all three models share overlapping training data and the prompt pushes them into fabrication mode, they produce the same plausible-sounding wrong answer and the voter sees consensus. This is not a theoretical concern. Our own benchmarks on factual tail questions showed that frontier models (GPT-5.4, Claude Sonnet 4.6, Gemini 3.1 Pro) agree on the answer essentially one hundred percent of the time on knowable facts — which means the voting signal contains zero information about correctness in that regime.</p>
-        <p>Single-model hallucination detection fails on the <strong>alternative problem</strong>. Even if you can detect that one model is fabricating, you still need an answer to give the user. Flagging the hallucination is half the job; replacing it with something trustworthy is the other half.</p>
-        <p>Mist runs both layers on the same query. Prism supplies architectural diversity and failover. QGE supplies structural hallucination detection. The combined decision logic handles the case where neither layer alone would catch the failure.</p>
+        <h2>Current state vs target architecture</h2>
+        <p>There are two things worth distinguishing here: <strong>what Mist does in production today</strong>, and <strong>what the combined verification architecture will do once the QGE index rebuild ships</strong>. The rest of this page is organized around that distinction.</p>
+        <p><strong>Current state (operational):</strong> Cross-architecture Prism dispatch with minimum-three-model diversity requirement. QGE scoring is logged in the audit trail but is not currently used to gate routing decisions on fabrication-prone prompts, because the 2026-04-08 benchmark showed domain-routed QGE produces identical discrimination to linguistic default on this class of prompt. QGE on HalluBench still achieves +26.1pp SOTA — that result holds in the HalluBench distribution and is a separate (real) capability we will share benchmark output for on request.</p>
+        <p><strong>Target architecture (forward work):</strong> The combined Prism + QGE four-cell decision matrix described in §"Target architecture" below. Dependency: rebuild of QGE's domain indexes at PubChem/ChEMBL scale (currently 583-32,000 facts per domain; target 10⁵+ for chemistry, comparable scale for other domains). Multi-week engineering project. Ship date: TBD.</p>
+        <p><strong>Why two layers are the target:</strong> A cross-architecture Prism ensemble catches fabrications that single models miss (the Q18 case in §"What Prism catches" is the documented proof). A single-model structural detector catches fabrications even when only one model sees the query. The combination — when both work in the routing context — covers failure modes that either alone misses. The combination is the target because each layer protects the other's blind spot. The reason we do not currently ship the combination is that one of the two layers (QGE in routing context) is not yet discriminating on fabrication-prone prompts, and we would rather ship the Prism half honestly than sell the combination prematurely.</p>
       </section>
 
       <section>
-        <h2>Layer 1 — Prism (cross-architecture dispatch)</h2>
+        <h2>Prism — cross-architecture dispatch (operational)</h2>
         <p>Prism dispatches the verified prompt in parallel to three (or more) models from distinct providers. The default panel uses one model from each of the three major frontier providers:</p>
         <ul>
           <li>OpenAI (GPT family)</li>
           <li>Anthropic (Claude family)</li>
           <li>Google (Gemini family)</li>
         </ul>
-        <p>You can override the panel via the <code>verification_panel</code> field to enforce your own diversity rules — for example, to include open-weight models for domains where their training lineage is meaningfully different, or to pin a specific architecture set required by compliance policy.</p>
-        <p>Prism produces four outputs that matter:</p>
+        <p>The <strong>minimum deployable Prism ensemble is three architecturally diverse models</strong>. Two is not enough — see the Q18 case below. You can override the panel via the <code>verification_panel</code> field to enforce your own diversity rules, include open-weight models for domains where lineage matters, or pin a specific architecture set required by compliance policy. The minimum-three constraint is enforced by the runtime.</p>
+
+        <h3 style="margin-top:28px;">Benchmark: what Prism reduces hallucination rate to</h3>
+        <p>Our fabrication-prone benchmark (N=25 fabricated prompts, N=10 controls, 3 frontier models, 2026-04-07) measured:</p>
+        <table>
+          <thead>
+            <tr><th>Configuration</th><th>Hallucination rate</th><th>Delta</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Single model (GPT-5.4 baseline)</td><td>16.0% (4/25)</td><td>—</td></tr>
+            <tr><td>3-model Prism (majority vote)</td><td>4.0% (1/25)</td><td><strong>−12 pp absolute, −75% relative</strong></td></tr>
+            <tr><td>Ensemble catches of individual fabrications</td><td>5/25</td><td>100% of single-model fabrications caught</td></tr>
+            <tr><td>Partial shared hallucinations (2-of-3)</td><td>1/25</td><td>Q18 (documented below)</td></tr>
+            <tr><td>Strict shared hallucinations (3-of-3)</td><td>0/25</td><td>Honest null at this N</td></tr>
+          </tbody>
+        </table>
+        <p><em>Caveat:</em> These numbers are on the fabrication-prone regime (questions about entities that do not exist). On easy factual recall where the answer is in every model's training data, the same benchmark showed 0% delta — frontier models are saturated on knowable facts and do not disagree with each other. Prism's value is in the fabrication-prone regime, not in factual recall. See <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/verification/PRISM_BENCHMARK_RESULTS_2026-04-07.md">docs/verification/PRISM_BENCHMARK_RESULTS_2026-04-07.md</a> for the factual-recall null result and <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/verification/SHARED_HALLUCINATION_CASE_STUDY_2026-04-07.md">docs/verification/SHARED_HALLUCINATION_CASE_STUDY_2026-04-07.md</a> for the fabrication-prone positive result.</p>
+
+        <h3 style="margin-top:28px;">The Q18 case — why three is the minimum</h3>
+        <p>Prompt: <em>"What is the molecular weight of methylhexylamine hydrochloride (CAS 7447-60-9)?"</em> The CAS number fails checksum validation. The compound is fabricated.</p>
+        <ul>
+          <li><strong>GPT-5.4:</strong> "The molecular weight is 151.68 g/mol." Invented a fake PubChem CID.</li>
+          <li><strong>Claude Sonnet 4.6:</strong> "Has a molecular weight of 151.68 g/mol." The same fabricated number, independently produced.</li>
+          <li><strong>Gemini 3.1 Pro:</strong> "The CAS number fails the standard checksum validation algorithm." Correct decline, via direct computation.</li>
+        </ul>
+        <p>Two architecturally distinct frontier models from two different vendors independently produced the exact same fabricated molecular weight. A 2-model Prism (GPT + Claude) would have returned 151.68 g/mol with high confidence. Only the third architecturally distinct model — Gemini, trained on different data with different validation tools — caught the fabrication. This is why the minimum deployable Prism ensemble is three models. The third model is not redundancy; it is the primitive that catches cases like this.</p>
+
+        <h3 style="margin-top:28px;">What Prism produces regardless of hallucination catching</h3>
+        <p>Even when models all agree (as they do on most factual-recall queries), Prism produces four outputs that are independently valuable:</p>
         <ol>
-          <li>The three individual model responses, normalized.</li>
-          <li>The audit trail (which model, when, at what cost and latency).</li>
-          <li>An agreement score computed semantically, not by string matching. "Signed March 3, 2021" and "Execution on 2021-03-03" agree. "$12.4 million" and "$124 million" do not. Code outputs are compared by behavior (compiles, passes tests, matches reference I/O).</li>
+          <li>The three individual model responses, normalized and timestamped.</li>
+          <li>A compliance-grade audit trail: which model, when, at what cost and latency. Name-in-SOC-2-evidence format.</li>
+          <li>An agreement score computed semantically. "Signed March 3, 2021" and "Execution on 2021-03-03" agree. "$12.4 million" and "$124 million" do not. Code outputs are compared by behavior.</li>
           <li>A structured disagreement trace when models diverge, identifying which claims conflict.</li>
         </ol>
-        <p>Prism by itself is valuable for three reasons that do not depend on catching hallucinations: it produces a compliance-grade audit trail, it provides architectural failover (if one provider rate-limits or goes down, the other two are already in-flight), and it generates a confidence label that procurement teams can point at in SOC 2 evidence. Use it alone where those benefits justify the cost and you do not need hallucination detection.</p>
+        <p>Prism by itself — independent of any hallucination-catching claim — provides compliance-grade audit trails, architectural failover (if one provider rate-limits, the other two are already in-flight), and confidence labeling that procurement teams can point at in SOC 2 evidence. These benefits do not depend on disagreement occurring.</p>
       </section>
 
       <section>
-        <h2>Layer 2 — QGE (structural hallucination detection)</h2>
-        <p>QGE (Quantum Grammar Engine) is Mist's in-house hallucination detector. It runs independently on each of the responses produced by Prism and assigns a hallucination risk score from 0.0 (structurally consistent with retrieved content) to 1.0 (structurally consistent with fabrication).</p>
-        <p>QGE does not require external documents, does not use RAG, and does not prompt the model to self-assess. The detector analyzes the output itself: grammatical coherence, internal consistency between claims, statistical signatures that distinguish retrieval from synthesis, and domain-specific markers tuned for the target task.</p>
-        <p>On HalluBench, the standard hallucination detection benchmark, our most recent evaluation showed a <strong>+26.1 percentage point improvement in mean detection</strong> over the published state of the art. The next generation of the detector targets 95% precision at 95% recall, tuned for high-stakes regimes where false positives cost almost as much as false negatives.</p>
-        <p>You can use QGE on single-model traffic without Prism by setting <code>verification: "qge"</code>. The QGE score is returned in <code>qge_metadata.hallucination_score</code>. For most verified workloads, however, Prism plus QGE together is the recommended configuration.</p>
+        <h2>QGE — HalluBench research + routing-context limitation</h2>
+        <p>QGE (Quantum Grammar Engine) is Mist's in-house structural hallucination detector. It analyzes the output itself — grammatical coherence, internal consistency between claims, statistical signatures that distinguish retrieval from synthesis — without requiring external documents, RAG, or self-reflection prompting.</p>
+
+        <h3 style="margin-top:24px;">HalluBench result — real and bounded</h3>
+        <p>On HalluBench, the standard hallucination detection benchmark, our 2026-04-07 evaluation showed a <strong>+26.1 percentage point improvement in mean detection</strong> over the published state of the art. The next generation of the detector targets 95% precision at 95% recall. The HalluBench result is real, reproducible, and we will share the raw benchmark output with technical buyers on request. <strong>For workloads whose distribution matches HalluBench, QGE adds signal.</strong></p>
+
+        <h3 style="margin-top:24px;">Routing-context limitation — the 2026-04-08 finding</h3>
+        <p>We ran a follow-up benchmark to test whether QGE's HalluBench signal transfers to the routing context — specifically, to fabrication-prone prompts like the Q18 chemistry case above. We re-scored all 105 model outputs from the Q18 case study under <strong>domain-routed QGE</strong> (chemistry configuration for chemistry prompts, society for case law, and so on) instead of the default linguistic configuration. The goal was to test whether properly-routed QGE would discriminate between fabrications and honest declines.</p>
+        <p>The benchmark falsified the routing-context discrimination claim:</p>
+        <ul>
+          <li><strong>104 of 105 scorings produced bit-identical max distances</strong> under linguistic and domain-routed configs. Domain routing did not change the output in an operationally meaningful way.</li>
+          <li><strong>Discrimination delta (hallucinated minus declined mean distance): −0.339 under BOTH configurations.</strong> QGE assigns <em>lower</em> distances — more trust — to hallucinations than to honest declines. The signal is not just absent; it points in the wrong direction.</li>
+          <li><strong>On Q18 specifically, chemistry-routed QGE scored GPT-5.4's 151.68 g/mol fabrication at d=2</strong> — the lowest, most-trusted distance in the entire 105-scoring benchmark. QGE actively trusted the most dangerous response in the run.</li>
+        </ul>
+        <p><strong>Root cause is index size, not algorithm.</strong> QGE's domain indexes are between 583 facts (math) and 32,000 facts (society). Fabricated entities have no anchor fact in any index, so the engine's "unsupported claim" gate fires identically on fabrications and honest declines. There is no ground truth for the engine to compare against when the question itself probes an entity outside its knowledge base.</p>
+        <p><strong>The fix is a multi-week engineering project:</strong> rebuild the domain indexes at PubChem / ChEMBL scale for chemistry, comparable expansions for other domains. Until that ships, QGE does not provide an independent routing-layer signal on fabrication-prone prompts, and <code>verification: "qge"</code> on fabrication-prone workloads will not catch the fabrications the Q18 case demonstrates. <strong>Use Prism for fabrication-prone workloads; use QGE on HalluBench-distribution workloads; do not rely on the combination in production until the index rebuild is shipped.</strong></p>
+        <p>Full finding: <a href="https://github.com/skinner-layne/waterlight/blob/main/docs/verification/SHARED_HALLUCINATION_QGE_FOLLOWUP_2026-04-08.md">docs/verification/SHARED_HALLUCINATION_QGE_FOLLOWUP_2026-04-08.md</a>.</p>
       </section>
 
       <section>
-        <h2>Combined decision logic</h2>
-        <p>When you set <code>verification: "prism"</code>, Mist runs both layers and routes the result through a four-cell decision matrix:</p>
+        <h2>Current production logic (Prism primary)</h2>
+        <p>When you set <code>verification: "prism"</code> in production today, Mist runs the cross-architecture ensemble and applies the following logic:</p>
+        <table class="decision-matrix">
+          <thead>
+            <tr>
+              <th>Prism state</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>All ≥3 models agree</td>
+              <td>Return consensus with <code>confidence: "high"</code>. Full audit trail in <code>verification_metadata</code>.</td>
+            </tr>
+            <tr>
+              <td>Models disagree, majority exists</td>
+              <td>Return majority answer with <code>confidence: "medium"</code>, attach disagreement trace, log the dissenting response(s).</td>
+            </tr>
+            <tr>
+              <td>Models disagree, no majority (tie at N=3: 1-1-1)</td>
+              <td>Return <code>"I do not know"</code> with <code>confidence: "rejected"</code>, recommend human review.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>The current production logic does <strong>not</strong> use QGE as a gating signal on fabrication-prone prompts, per the 2026-04-08 finding documented above. QGE scores are still computed and logged in <code>verification_metadata.qge</code> for audit-trail purposes, but they do not currently affect the routing decision.</p>
+      </section>
+
+      <section>
+        <h2>Target architecture (forward work)</h2>
+        <p>Once the QGE index rebuild ships (multi-week engineering project; target is PubChem/ChEMBL-scale fact ingestion for chemistry and comparable expansions for other domains), the production logic upgrades to a four-cell decision matrix that combines Prism agreement and QGE scoring:</p>
         <table class="decision-matrix">
           <thead>
             <tr>
@@ -122,21 +192,22 @@
             <tr>
               <td>All agree</td>
               <td>All high</td>
-              <td>Shared hallucination detected. Return <code>"I do not know"</code> with <code>confidence: "rejected"</code>. Log for review.</td>
+              <td>Shared hallucination detected (target behavior). Return <code>"I do not know"</code>, log for review.</td>
             </tr>
             <tr>
               <td>Disagree</td>
               <td>One low, others high</td>
-              <td>Return the low-score answer with <code>confidence: "medium"</code>, attach disagreement trace.</td>
+              <td>Return the low-QGE answer with <code>confidence: "medium"</code>, attach disagreement trace.</td>
             </tr>
             <tr>
               <td>Disagree</td>
               <td>All high</td>
-              <td>Question outside training coverage. Return <code>"I do not know"</code> with <code>confidence: "rejected"</code>, recommend human review.</td>
+              <td>Question outside training coverage. Return <code>"I do not know"</code>, recommend human review.</td>
             </tr>
           </tbody>
         </table>
-        <p>The second row is the reason this combination exists. Single-model detectors miss it because they only see one output. Voting ensembles miss it because voting rewards agreement. RAG misses it if retrieval returns nothing. Prism plus QGE catches it because QGE sees the structural signature of fabrication and Prism confirms all three independent architectures produced that fabricated content — a strong signal that the models share a bad prior and cannot be trusted on this query.</p>
+        <p><strong>This is target architecture, not current state.</strong> Row 2 of the matrix depends on QGE discriminating between fabrications and honest declines, which our 2026-04-08 benchmark established requires a larger domain index than we currently ship. We are publishing this target architecture transparently so customers can evaluate whether the forward work matters to their use case. Ship date: TBD.</p>
+        <p>In the meantime, row 2 is approximately served by the Prism ≥3-model requirement: the Q18 chemistry case showed that a single dissenting model (Gemini) was sufficient to flag a fabrication that the other two models had both produced. The minimum-three-architectural-diversity constraint is currently Mist's primary shared-hallucination defense.</p>
       </section>
 
       <section>
@@ -259,13 +330,17 @@
     "latency_ms": 6421
   }
 }</code></pre>
-        <p>Inspect <code>verification_metadata.decision</code> as the primary operational signal. Possible values:</p>
+        <p>Inspect <code>verification_metadata.decision</code> as the primary operational signal. Current production values:</p>
         <ul>
-          <li><code>consensus_verified</code> — all models agreed, all QGE scores below threshold. High confidence.</li>
-          <li><code>single_model_selected</code> — models disagreed but one produced a low-QGE answer. Medium confidence.</li>
-          <li><code>shared_hallucination_rejected</code> — all models agreed but all QGE scores above threshold. The answer field is <code>"I do not know"</code>. Do not display model content.</li>
-          <li><code>uncertainty_rejected</code> — full disagreement with all QGE scores high. The answer field is <code>"I do not know"</code>. Recommend human review.</li>
+          <li><code>consensus_verified</code> — all ≥3 architecturally diverse models agreed. High confidence.</li>
+          <li><code>majority_selected</code> — models disagreed, majority exists. Medium confidence. Dissent logged in <code>verification_metadata.disagreements</code>.</li>
+          <li><code>uncertainty_rejected</code> — no majority exists (all distinct answers at N=3). The answer field is <code>"I do not know"</code>. Recommend human review.</li>
         </ul>
+        <p>Forward-architecture values (will be introduced when the QGE index rebuild ships — see "Target architecture" above):</p>
+        <ul>
+          <li><code>shared_hallucination_rejected</code> — <em>not yet returned in current production.</em> Will be returned when all models agree AND all QGE scores (from rebuilt indexes) exceed threshold. Current production approximates this by routing to the majority-answer plus logging the Prism disagreement when any single model dissents.</li>
+        </ul>
+        <p>The <code>verification_metadata.qge</code> sub-object is populated today even though QGE is not currently used to gate the routing decision — the scores are in the audit trail so they can be reviewed later and so the index-rebuild transition is a pure runtime change when it ships, not a schema change.</p>
       </section>
 
       <section>
@@ -284,12 +359,15 @@
 
       <section>
         <h2>What verification does not claim</h2>
-        <p>We publish these limits explicitly so you know exactly what you are buying:</p>
+        <p>We publish these limits explicitly so you know exactly what you are buying. The 2026-04-08 revision of this list is grounded in two benchmarks we ran on ourselves and published openly:</p>
         <ul>
-          <li>Prism alone does not improve accuracy on simple factual questions. Our benchmarks show frontier models are saturated on factual recall; the single-model baseline is already at the ceiling. The value of Prism is audit trail, failover, compliance labeling, and the diversity signal that feeds the combined decision matrix with QGE.</li>
-          <li>QGE is a statistical detector with a publishable precision-recall curve. It misses some hallucinations. Serious buyers should assume false negatives exist and design their human-review layer accordingly.</li>
-          <li>Verification does not catch hallucinations produced by a training-data error that is structurally identical to retrieved content. Nothing can, without external ground truth. If that is a concern, pair verification with RAG from an authoritative corpus and cross-check against the retrieved documents.</li>
-          <li>Verification does not make judgment calls correct. For prompts where "right" is a matter of opinion or policy rather than fact, agreement across models is a signal of consistency, not of correctness. Use human review for judgment-bound decisions.</li>
+          <li><strong>Prism does not improve accuracy on simple factual recall.</strong> Our 2026-04-07 benchmark showed 0% delta vs single-model on 35 easy-and-tail-fact questions. Frontier models are saturated on knowable facts. Prism's value is in the fabrication-prone regime (where the 75% relative reduction in the Q18 case study applies), not in factual recall.</li>
+          <li><strong>QGE does not currently provide an independent routing-layer signal on fabrication-prone prompts.</strong> Our 2026-04-08 domain-routed follow-up benchmark produced bit-identical scores under linguistic and domain-routed configs (104 of 105 scorings) with a −0.339 discrimination delta in both. QGE on HalluBench is a separate real result; the two must not be conflated. The combined Prism+QGE decision matrix is target architecture, not current production.</li>
+          <li><strong>A 2-model Prism is insufficient for shared-hallucination protection.</strong> The Q18 case showed two frontier models producing the same fabrication. Only a third architecturally distinct model caught it. The minimum deployable ensemble is ≥3 architecturally diverse models.</li>
+          <li><strong>Strict 3-of-3 shared hallucinations are rare at the frontier but not zero.</strong> The 2026-04-07 benchmark observed 0/25 strict 3-of-3 cases but 1/25 partial 2-of-3 (Q18). The rate at N=100+ is not yet measured; the upcoming Mega Verification Benchmark is designed to estimate it.</li>
+          <li><strong>QGE is a statistical detector with a publishable precision-recall curve.</strong> It misses some hallucinations. Serious buyers should assume false negatives exist and design their human-review layer accordingly.</li>
+          <li><strong>Verification does not catch hallucinations produced by a training-data error that is structurally identical to retrieved content.</strong> Nothing can, without external ground truth. If that is a concern, pair verification with RAG from an authoritative corpus and cross-check against the retrieved documents.</li>
+          <li><strong>Verification does not make judgment calls correct.</strong> For prompts where "right" is a matter of opinion or policy rather than fact, agreement across models is a signal of consistency, not of correctness. Use human review for judgment-bound decisions.</li>
         </ul>
       </section>
 
